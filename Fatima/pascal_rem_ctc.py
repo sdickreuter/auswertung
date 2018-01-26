@@ -30,10 +30,13 @@ from scipy.signal import savgol_filter
 import peakutils
 from scipy import fftpack
 
-nmpx = 1000/610  # nm/px
+#nmpx = 1000/610  # nm/px
 
+nmppx = lambda x: np.e**12.042083520237357 * x**-0.9990196019745213
 
-path = '/home/sei/REM/Fatima2/'
+#path = '/home/sei/REM/Fatima2/'
+path = '/home/sei/Nextcloud_Uni/pascal/REM_fail/'
+
 savedir = path + 'plots/'
 
 show_plots = False
@@ -46,22 +49,28 @@ except:
 
 files = []
 for file in os.listdir(path):
-    if re.search(r"\.(tif)$", file) is not None:
+    if re.search(r"\.(TIF)$", file) is not None:
         files.append(file)
 
 print(files)
-do_erosion = [1,0,1,1,1]
-print(do_erosion)
+# do_erosion = [0,0,0,0,0,0,0]
+# print(do_erosion)
 
 #file = path+files[0]
 
 # # Open image file for reading (binary mode)
-# with open(path+file, 'rb') as f:
-#     tags = exifread.process_file(f)
-#     for tag in tags.keys():
-#         #if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename', 'EXIF MakerNote'):
-#         print("Key: %s, value %s" % (tag, tags[tag]))
+mags = []
+for file in files:
+    with open(path+file, 'rb') as f:
+        tags = exifread.process_file(f)
+        tag = tags['Image Tag 0x8778']
+        a = re.search(r'(Magnification){1}(\D+)(([0-9]*[.])?[0-9]+){1}', tag.values)
+        a = re.search(r'(([0-9]*[.])?[0-9]+){1}', a.group())
+        mags.append(float(a.group()))
 
+
+for m in mags:
+    print(str(m)+': '+str(nmppx(m)))
 
 coverage = np.array([])
 n = np.array([])
@@ -95,10 +104,10 @@ for f,file in enumerate(files):
     #p1, p99 = np.percentile(pic, (1, 99))
     #pic = exposure.rescale_intensity(pic, in_range=(p1, p99))
 
-    if do_erosion[f]:
-        pic = erosion(pic, disk(5))
-        pic = erosion(pic, disk(3))
-        pic = erosion(pic, disk(1))
+    # if do_erosion[f]:
+    #     pic = erosion(pic, disk(5))
+    #     pic = erosion(pic, disk(3))
+    #     pic = erosion(pic, disk(1))
 
     thresh = threshold_otsu(pic)*1.0
 
@@ -161,7 +170,7 @@ for f,file in enumerate(files):
     for i in range(xy.shape[0]):
         for j in range(xy.shape[0]):
             #if i != j:
-                dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmpx
+                dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmppx(mags[f])
 
     #n_hist, b, patches = plt.hist(dists.ravel(), 1000, histtype='stepfilled')
     n_hist, bin_edges = np.histogram(dists.ravel(), bins=1000,density=True)
@@ -204,7 +213,6 @@ for i in range(len(ctc)):
 
 f.close()
 
-
 print(radii)
 
 f = open(path + "radii.txt", 'w')
@@ -214,8 +222,6 @@ for i in range(len(radii)):
     f.write("\r\n")
 
 f.close()
-
-
 
 
 # for array in arrays:
