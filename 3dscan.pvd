@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<VTKFile byte_order="LittleEndian" type="Collection" version="0.1">
+<Collection>
+<DataSet file="3dscan400.vtu" group="" part="0" timestep="0"/>
+<DataSet file="3dscan450.vtu" group="" part="0" timestep="1"/>
+<DataSet file="3dscan500.vtu" group="" part="0" timestep="2"/>
+<DataSet file="3dscan550.vtu" group="" part="0" timestep="3"/>
+<DataSet file="3dscan600.vtu" group="" part="0" timestep="4"/>
+<DataSet file="3dscan650.vtu" group="" part="0" timestep="5"/>
+<DataSet file="3dscan700.vtu" group="" part="0" timestep="6"/>
+<DataSet file="3dscan750.vtu" group="" part="0" timestep="7"/>
+<DataSet file="3dscan800.vtu" group="" part="0" timestep="8"/>
+<DataSet file="3dscan850.vtu" group="" part="0" timestep="9"/>
+</Collection>
+</VTKFile>

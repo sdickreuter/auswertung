@@ -1,0 +1,84 @@
+import os
+
+import numpy as np
+import scipy.ndimage as ndimage
+import scipy.ndimage.filters as filters
+import scipy.optimize as opt
+from scipy.optimize import curve_fit, basinhopping
+import scipy.sparse as sparse
+from scipy.special import *
+from plotsettings import *
+import matplotlib.pyplot as plt
+import seaborn as sns
+from skimage.feature import peak_local_max
+from skimage.morphology import watershed
+from skimage.filters import threshold_otsu
+import re
+import scipy.signal as signal
+import peakutils as pu
+
+
+path = '/home/sei/Raman/Fatima/'
+savedir = path + 'plotwithref/'
+
+
+
+try:
+    os.mkdir(savedir)
+except:
+    pass
+
+
+files = []
+for file in os.listdir(path+'plotwithref/'):
+    if re.search(r"\.(txt)$", file) is not None:
+        files.append(file)
+
+print(files)
+
+f1 = 'Au_70nm_reference_1.txt'
+f2 = 'A_ED30_1.txt'
+
+k1, counts1 = np.loadtxt(path+'plotwithref/' + f1, unpack=True)
+k2, counts2 = np.loadtxt(path+'plotwithref/' + f2, unpack=True)
+
+
+#counts1 = signal.savgol_filter(counts1, 31, 1, mode='interp')
+base1 = pu.baseline(counts1, 1, max_it=10000, tol=0.00001)
+counts1 -= base1
+#
+# counts2 = signal.savgol_filter(counts2, 31, 1, mode='interp')
+#base2 = pu.baseline(counts2, 3, max_it=10000, tol=0.00001)
+#counts2 -= base2
+
+mask = (k1 > 1200) & (k1 < 1400)
+counts1 -= counts1[mask].mean()
+#counts2 -= counts2.min()
+
+counts2 /= 0.31 # filing factor correction
+
+mask1 = (k1 > 1000) & (k1 < 1650)
+mask2 = (k2 > 1000) & (k2 < 1650)
+
+
+# newfig(0.9)
+plt.plot(k1[mask1], counts1[mask1]*10, linewidth=1)
+plt.plot(k2[mask2], counts2[mask2], linewidth=1)
+# plt.plot(k, bl, linewidth=1)
+# plt.plot(wl[mask], filtered[mask], color="black", linewidth=0.6)
+plt.ylabel(r'$I_{\nu}\, /\, counts$')
+plt.xlabel(r'$\Delta\widetilde{\nu}\, /\, cm^{-1}$')
+plt.ylim([counts2.min()*0.8,counts2.max()*1.1])
+plt.legend(["70 nm Gold Film x 10","Sample A, filling factor corrected"])
+plt.tight_layout()
+#plt.show()
+plt.savefig(savedir + "vergleich.eps", dpi=1200)
+plt.savefig(savedir + "vergleich.png", dpi=1200)
+plt.savefig(savedir + "vergleich.pdf", dpi=1200)
+plt.close()
+
+print(counts2.max())
+mask = (k1 > 1300) & (k1 < 1350)
+d = counts1[mask].max()-counts1[mask].min()
+print(d)
+print(counts2.max()/d)
