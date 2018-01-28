@@ -30,10 +30,11 @@ from scipy.signal import savgol_filter
 import peakutils
 from scipy import fftpack
 
-nmpx = 1000/610  # nm/px
+nmppx = 1000/610  # nm/px
 
 
-path = '/home/sei/REM/Fatima2/'
+#path = '/home/sei/REM/Fatima2/'
+path = '/home/sei/Nextcloud_Uni/fatima/'
 savedir = path + 'plots/'
 
 show_plots = False
@@ -50,7 +51,7 @@ for file in os.listdir(path):
         files.append(file)
 
 print(files)
-do_erosion = [1,0,1,1,1]
+do_erosion = [1,1,1,1,1]
 print(do_erosion)
 
 #file = path+files[0]
@@ -126,7 +127,7 @@ for f,file in enumerate(files):
 
     rs = np.zeros(0)
     for region in regionprops(blobs_labels):
-        rs = np.hstack((rs, region.equivalent_diameter*nmppx(mags[f])))
+        rs = np.hstack((rs, region.equivalent_diameter*nmppx))
 
     mask = (rs > 10) & (rs < 120)
     rs = rs[mask]
@@ -143,13 +144,16 @@ for f,file in enumerate(files):
     indexes = peakutils.indexes(filtered, thres=2e-5, min_dist=10)
     sorted = np.flipud(np.argsort(y[indexes]))
     indexes = indexes[sorted]
-    # print(indexes)
+    print(indexes)
     # print(x[indexes[0]])
     # plt.scatter(x,y)
     # plt.plot(x,filtered)
     # plt.text(x[indexes[0]], filtered[indexes[0]], str(int(round(x[indexes[0]]))), zorder=10)
     # plt.show()
-    radii.append(x[indexes[0]])
+    if len(indexes)>0:
+        radii.append(x[indexes[0]])
+    else :
+        radii.append(np.mean(x))
 
     xy = np.array([0,2])
     for region in regionprops(blobs_labels):
@@ -161,7 +165,7 @@ for f,file in enumerate(files):
     for i in range(xy.shape[0]):
         for j in range(xy.shape[0]):
             #if i != j:
-                dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmpx
+                dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmppx
 
     #n_hist, b, patches = plt.hist(dists.ravel(), 1000, histtype='stepfilled')
     n_hist, bin_edges = np.histogram(dists.ravel(), bins=1000,density=True)

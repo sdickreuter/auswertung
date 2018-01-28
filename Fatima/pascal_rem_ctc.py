@@ -33,9 +33,10 @@ from scipy import fftpack
 #nmpx = 1000/610  # nm/px
 
 nmppx = lambda x: np.e**12.042083520237357 * x**-0.9990196019745213
+#nmppx = lambda x: np.e**12. * x**-1.
 
 #path = '/home/sei/REM/Fatima2/'
-path = '/home/sei/Nextcloud_Uni/pascal/REM_fail/'
+path = '/home/sei/Nextcloud_Uni/pascal/REMb/'
 
 savedir = path + 'plots/'
 
@@ -89,8 +90,12 @@ for f,file in enumerate(files):
 
     pic = scipy.misc.imread(file)
     #print("Image Size: " + str(pic.shape))
-    pic = pic[:1780,:]
+    pic = pic[:423,:]
     pic = exposure.rescale_intensity(pic)
+
+    # if show_plots:
+    #     plt.imshow(pic)
+    #     plt.show()
 
     ffile = file[:-4] + '_denoised.jpg'
     if os.path.isfile(ffile):
@@ -110,6 +115,7 @@ for f,file in enumerate(files):
     #     pic = erosion(pic, disk(1))
 
     thresh = threshold_otsu(pic)*1.0
+
 
     mask = pic
     h = thresh
@@ -135,7 +141,10 @@ for f,file in enumerate(files):
 
     rs = np.zeros(0)
     for region in regionprops(blobs_labels):
-        rs = np.hstack((rs, region.equivalent_diameter*nmppx(mags[f])))
+        #area = region.convex_area * nmppx(mags[f])**2
+        r = np.sqrt(region.convex_area/np.pi)*nmppx(mags[f])
+        rs = np.hstack((rs, r))
+        #rs = np.hstack((rs, region.equivalent_diameter/2*nmppx(mags[f])))
 
     mask = (rs > 10) & (rs < 120)
     rs = rs[mask]
@@ -152,12 +161,15 @@ for f,file in enumerate(files):
     indexes = peakutils.indexes(filtered, thres=2e-5, min_dist=10)
     sorted = np.flipud(np.argsort(y[indexes]))
     indexes = indexes[sorted]
-    # print(indexes)
-    # print(x[indexes[0]])
-    # plt.scatter(x,y)
-    # plt.plot(x,filtered)
-    # plt.text(x[indexes[0]], filtered[indexes[0]], str(int(round(x[indexes[0]]))), zorder=10)
-    # plt.show()
+    peakutils.interpolate(x, y, ind=indexes)
+    print(file)
+    print('mean radius: '+str(x[indexes[0]]))
+    if show_plots:
+        plt.scatter(x,y)
+        plt.plot(x,filtered)
+        plt.text(x[indexes[0]], filtered[indexes[0]], str(int(round(x[indexes[0]]))), zorder=10)
+        plt.show()
+    #radii.append(peakutils.interpolate(x, filtered, ind=indexes[0]))
     radii.append(x[indexes[0]])
 
     xy = np.array([0,2])

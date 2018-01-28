@@ -3,7 +3,8 @@ import pandas as pd
 from plotsettings import *
 import matplotlib.pyplot as plt
 
-path = '/home/sei/Nextcloud_Uni/pascal/REM/'
+path = '/home/sei/Nextcloud_Uni/pascal/REMb/'
+#path = '/home/sei/Nextcloud_Uni/fatima/'
 
 
 ctc = pd.read_csv(path+'ctc.txt')
