@@ -13,6 +13,7 @@ import numpy as np
 import scipy
 import scipy.ndimage as ndimage
 import scipy.ndimage.filters as filters
+from scipy.optimize import minimize, curve_fit
 from skimage import exposure
 from skimage import measure
 from skimage.feature import peak_local_max
@@ -35,12 +36,17 @@ from scipy import fftpack
 nmppx = lambda x: np.e**12.042083520237357 * x**-0.9990196019745213
 #nmppx = lambda x: np.e**12. * x**-1.
 
-#path = '/home/sei/REM/Fatima2/'
-path = '/home/sei/Nextcloud_Uni/pascal/REMb/'
+
+#path = '/home/sei/Nextcloud/pascal/REM/'
+path = '/home/sei/Nextcloud/pascal/REM/'
 
 savedir = path + 'plots/'
 
 show_plots = False
+
+def gauss(x, amplitude, x0, sigma):
+    g = amplitude *np.exp(-np.square((x-x0)/(2*sigma)))
+    return g.ravel()
 
 try:
     os.mkdir(savedir)
@@ -54,12 +60,16 @@ for file in os.listdir(path):
         files.append(file)
 
 print(files)
+
+#files = ['001CETC08.TIF']
+#files = ['90SIL12.TIF']
+
 # do_erosion = [0,0,0,0,0,0,0]
 # print(do_erosion)
 
 #file = path+files[0]
 
-# # Open image file for reading (binary mode)
+# Open image file for reading (binary mode)
 mags = []
 for file in files:
     with open(path+file, 'rb') as f:
@@ -81,14 +91,15 @@ area_err = np.array([])
 labels = np.array([])
 
 ctc = []
+ctc_fwhm = []
 radii = []
+radii_fwhm = []
 
 for f,file in enumerate(files):
     print(file)
     labels = np.append(labels, file[:-4])
-    file = path+file
 
-    pic = scipy.misc.imread(file)
+    pic = scipy.misc.imread(path+file)
     #print("Image Size: " + str(pic.shape))
     pic = pic[:423,:]
     pic = exposure.rescale_intensity(pic)
@@ -97,13 +108,13 @@ for f,file in enumerate(files):
     #     plt.imshow(pic)
     #     plt.show()
 
-    ffile = file[:-4] + '_denoised.jpg'
-    if os.path.isfile(ffile):
-        pic = scipy.misc.imread(ffile)
-    else:
-        pic = denoise_bilateral(pic, sigma_color=0.1, sigma_spatial=3, multichannel=False)
-        #pic = denoise_bilateral(pic, sigma_color=0.01, sigma_spatial=1, multichannel=False)
-        scipy.misc.imsave(ffile, pic)
+    # ffile = file[:-4] + '_denoised.jpg'
+    # if os.path.isfile(ffile):
+    #     pic = scipy.misc.imread(ffile)
+    # else:
+    #     pic = denoise_bilateral(pic, sigma_color=0.1, sigma_spatial=3, multichannel=False)
+    #     #pic = denoise_bilateral(pic, sigma_color=0.01, sigma_spatial=1, multichannel=False)
+    #     scipy.misc.imsave(ffile, pic)
 
 
     #p1, p99 = np.percentile(pic, (1, 99))
@@ -114,8 +125,8 @@ for f,file in enumerate(files):
     #     pic = erosion(pic, disk(3))
     #     pic = erosion(pic, disk(1))
 
-    thresh = threshold_otsu(pic)*1.0
-
+    #thresh = threshold_otsu(pic)*0.6
+    thresh = 0.95 * pic.max()
 
     mask = pic
     h = thresh
@@ -135,42 +146,73 @@ for f,file in enumerate(files):
         plt.imshow(bin)
         plt.show()
 
+    plt.imshow(bin)
+    plt.savefig(savedir+file+'.png',dpi=600)
+    plt.close()
 
     all_labels = measure.label(bin)
     blobs_labels = measure.label(bin, background=0)
 
     rs = np.zeros(0)
     for region in regionprops(blobs_labels):
-        #area = region.convex_area * nmppx(mags[f])**2
+        area = region.convex_area * nmppx(mags[f])**2
         r = np.sqrt(region.convex_area/np.pi)*nmppx(mags[f])
         rs = np.hstack((rs, r))
+
         #rs = np.hstack((rs, region.equivalent_diameter/2*nmppx(mags[f])))
 
-    mask = (rs > 10) & (rs < 120)
+        # bb = region.bbox
+        # r =  np.abs(float(bb[0]-bb[2])*nmppx(mags[f]))/2
+        # rs = np.hstack((rs, r))
+        # r =  np.abs(float(bb[1]-bb[3])*nmppx(mags[f]))/2
+        # rs = np.hstack((rs, r))
+
+
+    print(rs)
+    mask = (rs > 3) & (rs < 120)
     rs = rs[mask]
-    #n_hist, b, patches = plt.hist(rs.ravel(), 100, histtype='stepfilled')
+    #n_hist, b, patches = plt.hist(rs.ravel(), 50, histtype='stepfilled')
     #plt.show()
-    n_hist, bin_edges = np.histogram(rs.ravel(), bins=100,density=True)
+    n_hist, bin_edges = np.histogram(rs.ravel(), bins=50,density=True)
     x = bin_edges[:-1]
     y = n_hist
     mask = (y > 0)
     x = x[mask]
     y = y[mask]
-    filtered = savgol_filter(y, 11, 2)
-    filtered = savgol_filter(filtered, 11, 2)
-    indexes = peakutils.indexes(filtered, thres=2e-5, min_dist=10)
-    sorted = np.flipud(np.argsort(y[indexes]))
-    indexes = indexes[sorted]
-    peakutils.interpolate(x, y, ind=indexes)
-    print(file)
-    print('mean radius: '+str(x[indexes[0]]))
+
+    #plt.plot(x,y)
+    #plt.show()
+
+    fit_fun = lambda x, a,x0,sigma,c: gauss(x,a,x0,sigma)+c
+    #p0 = [y.max(),x[indexes[0]],10,0]
+    p0 = [y.max(), x[np.argmax(y)], 1, 0]
+
+    popt, pcov = curve_fit(fit_fun, x, y, p0)
+    print(popt)
+
+    radii.append(popt[1])
+    radii_fwhm.append(np.abs(popt[2])*2.3548) # convert sigma to fwhm
+
     if show_plots:
         plt.scatter(x,y)
-        plt.plot(x,filtered)
-        plt.text(x[indexes[0]], filtered[indexes[0]], str(int(round(x[indexes[0]]))), zorder=10)
+        x2 = np.linspace(x.min(),x.max(),200)
+        plt.plot(x2,fit_fun(x2,popt[0],popt[1],popt[2],popt[3]))
         plt.show()
-    #radii.append(peakutils.interpolate(x, filtered, ind=indexes[0]))
-    radii.append(x[indexes[0]])
+
+    plt.plot(x,y)
+    x2 = np.linspace(x.min(),x.max(),200)
+    plt.plot(x2,fit_fun(x2,popt[0],popt[1],popt[2],popt[3]))
+    plt.savefig(savedir+file+'_radiushist.png',dpi=600)
+    plt.close()
+
+    print(file)
+    print('mean radius: '+str(popt[1]))
+
+
+    # x = bin_edges[:-1]
+    # y = n_hist
+    # index = np.argmax(y)
+    # radii.append(x[index])
 
     xy = np.array([0,2])
     for region in regionprops(blobs_labels):
@@ -185,42 +227,66 @@ for f,file in enumerate(files):
                 dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmppx(mags[f])
 
     #n_hist, b, patches = plt.hist(dists.ravel(), 1000, histtype='stepfilled')
-    n_hist, bin_edges = np.histogram(dists.ravel(), bins=1000,density=True)
+    #plt.show()
+    #plt.close()
+    n_hist, bin_edges = np.histogram(dists.ravel(), bins=int(dists.max()/2),density=True)
     x = bin_edges[:-1]
     y = n_hist
 
-    filtered = savgol_filter(y, 11, 2)
-    filtered = savgol_filter(filtered, 11, 2)
 
     #plt.xlim((60,1000))
-    mask = (x > 60) & (x < 1000)
+    mask = (x > 1) & (x < 170)
     x = x[mask]
     y = y[mask]
-    filtered = filtered[mask]
 
-    indexes = peakutils.indexes(filtered, thres=2e-5, min_dist=10)
-    indexes = indexes[0:7]
+    y = scipy.signal.medfilt(y,5)
+
+    fit_fun = lambda x, a,x0,sigma,c: gauss(x,a,x0,sigma)+c
+    p0 = [y.max(),150,60,0]
+    #bnds = ([0, 1, 1,0], [y.max()*100, 200, 500,y.max()])
+    #popt, pcov = curve_fit(fit_fun, x, y, p0,bounds=bnds)
+
+
+    err_fun = lambda p: np.mean((fit_fun(x, *p) - y) ** 2)
+    upper = [y.max()*1000, 200, 500, y.max()]
+    lower = [0,1,1,0]
+    bnds = []
+    for i in range(len(upper)):
+        bnds.append((lower[i], upper[i]))
+
+    #minimizer_kwargs = {"method": "SLSQP","bounds": bnds,"tol":1e-10}
+    #res = scipy.optimize.basinhopping(err_fun, p0, minimizer_kwargs=minimizer_kwargs, niter=1000,disp=False)
+    #res = opt.minimize(err_fun, p0, method='SLSQP', options={'disp': True, 'maxiter': 10000},tol=1e-10)
+    #res = opt.minimize(err_fun, start, method='L-BFGS-B', options={'disp': True, 'maxiter': 5000})
+    res = scipy.optimize.minimize(err_fun, p0, method='Nelder-Mead', options={'disp': True, 'maxiter': 5000})
+
+    popt = res.x
+
+    print(popt)
+
     if show_plots:
-        for m, ind in enumerate(indexes):
-            plt.text(x[ind], filtered[ind], str(int(round(x[ind]))), zorder=10)
-
         plt.plot(x,y)
-        plt.plot(x,filtered)
+        plt.plot(x,fit_fun(x,popt[0],popt[1],popt[2],popt[3]))
         plt.title(file)
         plt.show()
+        plt.close()
 
-    d = x[indexes]
-    print(d)
-    ctc.append(d[0])
+    plt.plot(x,y)
+    plt.plot(x,fit_fun(x,popt[0],popt[1],popt[2],popt[3]))
+    plt.savefig(savedir+file+'_ctchist.png',dpi=600)
+    plt.close()
+
+    ctc.append(popt[1])
+    ctc_fwhm.append(np.abs(popt[2])*2.3548)
 
 
 
 print(ctc)
 
 f = open(path + "ctc.txt", 'w')
-f.write("file,ctc"+"\r\n")
+f.write("file,ctc,fwhm"+"\r\n")
 for i in range(len(ctc)):
-    f.write(files[i] + ','+str(ctc[i]))
+    f.write(files[i] + ','+str(ctc[i])+ ','+str(ctc_fwhm[i]))
     f.write("\r\n")
 
 f.close()
@@ -228,9 +294,9 @@ f.close()
 print(radii)
 
 f = open(path + "radii.txt", 'w')
-f.write("file,radius"+"\r\n")
+f.write("file,radius,fwhm"+"\r\n")
 for i in range(len(radii)):
-    f.write(files[i] + ','+str(radii[i]))
+    f.write(files[i] + ','+str(radii[i]) + ','+str(radii_fwhm[i]))
     f.write("\r\n")
 
 f.close()

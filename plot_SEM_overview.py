@@ -5,7 +5,8 @@ import os
 import re
 import PIL
 import matplotlib.gridspec as gridspec
-
+#from matplotlib_scalebar.scalebar import ScaleBar
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 #sample = "p41m"
 #arrays = ["dif0", "dif1", "dif2", "dif3", "dif4", "dif5", "dif6"]
@@ -19,18 +20,29 @@ import matplotlib.gridspec as gridspec
 #arrays = ["did4", "did5", "did6"]
 #arrays = ["did5"]
 
-sample = "2C1"
-arrays = ["2C1_75hept_B2"]
+#sample = "2C1"
+#arrays = ["2C1_75hept_B2"]
 
+arrays = ["p45m4"]
 
 
 letters = [chr(c) for c in range(65, 91)]
 
 for array in arrays:
 
-    path = '/home/sei/Auswertung/'+sample+'/'+array+'/'
+    #path = '/home/sei/Auswertung/'+sample+'/'+array+'/'
+    path = '/home/sei/REM/' + array+'/'
 
-    savedir = 'plots/'
+    try:
+        nmpx = np.loadtxt(path + "nmppx")
+    except:
+        raise RuntimeError("nmppx not found!")
+
+    print(nmpx)
+
+
+    #savedir = 'plots/'
+    savedir = 'denoised/'
 
     fname = path + "sem_overview.jpg"
 
@@ -48,16 +60,16 @@ for array in arrays:
     # print(files)
 
     #n = int(np.sqrt(len(files)))
-    nx = 7
-    ny = 7
+    nx = 5
+    ny = 5
 
     #fig, axs = plt.subplots(n,n, figsize=figsize(1.0))
     #fig.subplots_adjust(hspace = .001, wspace=.001)
 
     size = figsize(1.0)
-    fig = plt.figure(figsize=(size[0],size[0]))
+    fig = plt.figure(figsize=(size[0],size[0]*0.85))
     #fig.suptitle(sample+' '+array)
-    gs1 = gridspec.GridSpec(nx, ny)
+    gs1 = gridspec.GridSpec(nx, ny,wspace=0.01, hspace=0.0)
     #indices = np.arange(0,len(files),1)
 
 
@@ -67,7 +79,10 @@ for array in arrays:
             i = (ix)+(iy*ny)
             id = (letters[iy] + "{0:d}".format(ix+1))
             try:
-                img = np.asarray(PIL.Image.open(path + savedir + id+'.png'))
+                #print(path + savedir + id+'_denoised.png')
+                img = np.asarray(PIL.Image.open(path + savedir + id+'_denoised.jpg'))
+                #print(img.shape)
+                img = img[50:(484-50),50:(712-50)]
                 skip = False
             except:
                 img = np.zeros((100,100))
@@ -75,12 +90,23 @@ for array in arrays:
 
             img = 255 - img
             #img = np.flipud(img)
-            ax = plt.subplot(gs1[c])
+            ax = plt.Subplot(fig,gs1[c])
             #ax.text(1, img.shape[1] - 1, id, color="white", fontsize=8)
             if not skip:
                 ax.imshow(img, cmap="gray_r")
-                ax.text(3, 3+9, id, color="white", fontsize=8)
+                ax.text(0, -20, id, color="black", fontsize=8)
+                scalebar = AnchoredSizeBar(ax.transData,
+                                           100/nmpx, '', 'lower right',
+                                           pad=0.1,
+                                           color='white',
+                                           frameon=False,
+                                           size_vertical=1,label_top=True)
+                ax.add_artist(scalebar)
+
+            ax.set_xticks([])
+            ax.set_yticks([])
             ax.set_axis_off()
+            fig.add_subplot(ax)
             # ax.set_title(file[:-4])
             c += 1
 
@@ -109,11 +135,14 @@ for array in arrays:
     #     ax.set_axis_off()
     #     #ax.set_title(file[:-4])
 
-    gs1.update(wspace=0.1, hspace=0.1) # set the spacing between axes.
-    #plt.tight_layout()
+    #gs1.update(wspace=0.01, hspace=0.0) # set the spacing between axes.
+    gs1.tight_layout(fig,pad=1.0,h_pad=-0.5, w_pad=0.2)
 
     #plt.show()
-    plt.savefig(path+"overview/" + sample+'_'+array+ "_sem_overview.pdf", dpi= 300)
-    plt.savefig(path+"overview/" + sample+'_'+array+"_sem_overview.pgf")
-    plt.savefig(path+"overview/" + sample+'_'+array+"_sem_overview.eps", dpi = 1200)
+    # plt.savefig(path+"overview/" + sample+'_'+array+ "_sem_overview.pdf", dpi= 300)
+    # plt.savefig(path+"overview/" + sample+'_'+array+"_sem_overview.pgf")
+    # plt.savefig(path+"overview/" + sample+'_'+array+"_sem_overview.eps", dpi = 1200)
+    plt.savefig(path+"overview/" + array+ "_sem_overview.pdf", dpi= 1200)
+    plt.savefig(path+"overview/" + array+"_sem_overview.pgf", dpi= 2400)
+    plt.savefig(path+"overview/" + array+"_sem_overview.eps", dpi = 1200)
     plt.close()

@@ -20,13 +20,13 @@ except ImportError:
 
 path = '/home/sei/Spektren/pranoti/'
 
-samples = ['E 10283 E9 0.0s map']
-#samples = ['E 10283 B9 0.0s map', 'E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
+#samples = ['E 10284 D7 10s map']
+samples = ['E 10283 E9 0.0s map', 'E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
 
 fliplr = False
 flipud = False
-pickle_data = True
-plot_pointspectra = False
+pickle_data = False
+plot_pointspectra = True
 
 
 minwl = 400
@@ -195,9 +195,16 @@ for sample in samples:
     for i in range(len(files)):
         index_matrix[xy[i,0],xy[i,1]] = i
 
+
+
+
+    # mui importante!
     # use lower right corner as reference
     wl, lamp = np.loadtxt(open(savedir + files[index_matrix[59,0]], "rb"), delimiter=",", skiprows=16, unpack=True)
     print('Reference file: '+files[index_matrix[59,0]])
+
+
+
 
 
     for i in range(len(files)):
@@ -263,19 +270,22 @@ for sample in samples:
 
         im = ax1.imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
                extent=extents(xy[:,0]) + extents(xy[:,1]), origin='lower')
-        ax1.set_xlim(0, nx * dx)
-        ax1.set_ylim(0, ny * dy)
+        #ax1.set_xlim([extents(xy[0, 0]), extents(xy[1, 0])])
+        #ax1.set_ylim([extents(xy[0, 1]), extents(xy[1, 1])])
+        ax1.set_xlim(0, nx * dx-1)
+        ax1.set_ylim(0, ny * dy-1)
         cb = f.colorbar(im, ax=ax1)
         cb.set_label(r'$T^{rel}_{'+str(minwl)+'-'+str(maxwl)+r'\,nm}$')
         for i in range(len(x0)):
             #plt.plot(x0[i],y0[i],'o')
-            ax1.scatter(x0[i]+1,y0[i]-1, s=30, facecolors='none',edgecolors=colors[i],linewidths=1.5)
+            ax1.scatter(x0[i],ny-y0[i], s=30, facecolors='none',edgecolors=colors[i],linewidths=1.5)
         ax1.set_xlabel(r'$x\, /\, \mu m$')
         ax1.set_ylabel(r'$y\, /\, \mu m$')
 
         for i in range(len(x0)):
             xind = int(np.round(x0[i] / dx))
-            yind = ny-int(np.round(y0[i] / dy))
+            #yind = ny-int(np.round(y0[i] / dy))
+            yind = ny - int(np.round(y0[i] / dy))
             print(index_matrix[xind,yind])
             img[xind,yind] = 0
             file = files[index_matrix[xind,yind]]
@@ -286,15 +296,18 @@ for sample in samples:
         ax2.set_ylabel(r'$T^{rel}_{'+str(minwl)+'-'+str(maxwl)+r'\,nm}$')
         ax2.set_xlabel(r'$\lambda\, /\, nm$')
         ax2.set_xlim((minwl, maxwl))
-        #ax2.set_ylim([0, 1])
+        ax2.set_ylim([0, 1.05])
         #plt.legend(['inside electrode','edge of electrode','contact lead'])
+        plt.tight_layout()
         plt.savefig(savedir + "overview/" + sample + " point spectra.pdf", dpi=300)
         plt.close()
 
         plt.imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
                    extent=extents(xy[:, 0]) + extents(xy[:, 1]), origin='lower')
-        plt.xlim(0, nx * dx)
-        plt.ylim(0, ny * dy)
+        #plt.xlim(extents(xy[0, 0]), extents(xy[1, 0]))
+        #plt.ylim(extents(xy[0, 1]), extents(xy[1, 1]))
+        plt.xlim(0, nx * dx-1)
+        plt.ylim(0, ny * dy-1)
         plt.tight_layout()
         plt.savefig(savedir + "overview/" + "map_check.pdf", dpi=300)
         plt.close()

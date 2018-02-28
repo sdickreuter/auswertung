@@ -20,7 +20,7 @@ import matplotlib.widgets as mwidgets
 
 path = '/home/sei/Spektren/'
 
-samples = ['p45m_did5_par5']
+samples = ['p45m_did5_par12']
 #samples = ['p41m_dif5_par']
 
 

@@ -20,7 +20,7 @@ import matplotlib.widgets as mwidgets
 
 path = '/home/sei/Spektren/'
 
-samples = ['p45m_did5_par5']
+samples = ['p45m_did5_par7']
 #samples = ['p41m_dif5_par']
 
 
@@ -69,7 +69,7 @@ class GetxIndices:
 
         self.clickCid = self.connect("button_press_event",self.onClick)
 
-    def find_nearest(array, value):
+    def find_nearest(self, array, value):
         idx = (np.abs(array - value)).argmin()
         return int(idx)
 
@@ -123,6 +123,7 @@ for sample in samples:
     last_popt = None
     for i in range(len(files)):
         file = files[i]
+        print(file)
         wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
         if not is_extinction:
             counts = (counts - bg) / (lamp - dark)
@@ -132,7 +133,7 @@ for sample in samples:
         counts[np.where(counts == np.inf)] = 0.0
         filtered = savgol_filter(counts, 51, 0, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
 
-        mask = ((wl < 480) & (wl > 440) ) | ((wl > 800) & (wl < 1000) )
+        mask = ((wl < 480) & (wl > 420) ) | ((wl > 800) & (wl < 1000) )
 
         x = wl[mask]
         y = counts[mask]

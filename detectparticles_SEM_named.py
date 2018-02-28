@@ -29,7 +29,7 @@ from scipy import ndimage
 #arrays = ["dif0", "dif1", "dif2", "dif3", "dif5", "dif6"]
 #arrays = ["dif0"]
 
-sample = "p45m4"
+sample = "p45m3"
 array = "did5"
 
 
@@ -206,7 +206,7 @@ for i,file in enumerate(files):
 
     #bin = fdata > thresh*1.70
     #bin = fdata > thresh*1.7
-    bin = fdata > thresh * 1.5
+    bin = fdata > thresh * 0.85
     print('Threshold:' + str(thresh))
 
 

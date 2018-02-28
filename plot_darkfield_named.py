@@ -19,8 +19,8 @@ from matplotlib import ticker
 
 path = '/home/sei/Spektren/'
 
-samples = ['p45m_did5_heat']
-#samples = ['p52m_dif5_par']
+#samples = ['p45m_did5_heat']
+samples = ['p45m_did5_par7','p45m_did5_par12']
 #samples = ['p45m_did5_par','p45m_did6_par']
 #samples = ['p41m_dif3_par','p41m_dif4_par','p41m_dif5_par']
 #samples = ['ED30_1_test']

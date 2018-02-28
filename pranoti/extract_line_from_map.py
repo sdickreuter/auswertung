@@ -13,8 +13,8 @@ import pyqtgraph as pg
 
 path = '/home/sei/Spektren/pranoti/'
 
-#samples = ['E 10283 A1 1s map']
-samples = ['E 10283 E9 0.0s map','E 10283 C1 0.2s map','E 10283 A1 1s map',]
+samples = ['E 10284 D7 10s map']
+#samples = ['E 10283 E9 0.0s map','E 10283 C1 0.2s map','E 10283 A1 1s map',]
 
 dirs = ['y','x','x',]
 
