@@ -34,7 +34,7 @@ nmppx = 1000/610  # nm/px
 
 
 #path = '/home/sei/REM/Fatima2/'
-path = '/home/sei/Nextcloud/Fatima3/'
+path = '/home/sei/Nextcloud/fatima/'
 savedir = path + 'plots/'
 
 show_plots = False
@@ -55,7 +55,7 @@ for file in os.listdir(path):
         files.append(file)
 
 print(files)
-do_erosion = [1,1,0]
+do_erosion = [1,1,1,1,1,1]
 print(do_erosion)
 
 #file = path+files[0]
@@ -125,6 +125,11 @@ for f,file in enumerate(files):
     bin = pic > thresh
     #bin = pic > np.max(pic)/2
 
+    if do_erosion[f]:
+        pic = erosion(pic, disk(5))
+        pic = erosion(pic, disk(3))
+        pic = erosion(pic, disk(1))
+
     if show_plots:
         plt.imshow(bin)
         plt.show()
@@ -193,10 +198,7 @@ for f,file in enumerate(files):
     print('mean radius: '+str(popt[1]))
 
 
-    if do_erosion[f]:
-        pic = erosion(pic, disk(5))
-        pic = erosion(pic, disk(3))
-        pic = erosion(pic, disk(1))
+
 
     bin = pic > thresh
     all_labels = measure.label(bin)

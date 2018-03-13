@@ -18,9 +18,14 @@ except ImportError:
 
 path = '/home/sei/Spektren/pranoti/'
 
-samples = ['E 10283 E9 0.0s map','E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
+#samples = ['E 10283 E9 0.0s map','E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
+#x0s = [35,31,35,27]
+#y0s = [34,31,32,32]
+
+samples = ['E 10283 B9 0.0s map','E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
 x0s = [35,31,35,27]
 y0s = [34,31,32,32]
+
 
 halfwidth = 25#16
 
@@ -88,7 +93,7 @@ for i in range(len(samples)):
 
     #data_extent = (x_new.min(), x_new.max(), y_new.min(), y_new.max())
     #ims.append( grid[i].imshow(img, extent=data_extent, cmap=plt.get_cmap('viridis'), interpolation="nearest", clim=[0,1],origin="lower") )
-    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
+    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('gray'),
                extent=extents(x_new) + extents(y_new), origin='lower', clim=[0,1.1]) )
 
 

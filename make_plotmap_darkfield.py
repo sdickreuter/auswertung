@@ -73,6 +73,8 @@ def make_plotmap(path, nx, ny, minwl,maxwl,switch_xy=False,flip_x=False,flip_y=F
     cb.update_ticks()
     cb.ax.tick_params(axis='y', direction='out')
     cb.set_label(r'$\lambda\, /\, nm$')
+
+
     plt.xlabel(r'$x\, /\, \mu m$')
     plt.ylabel(r'$y\, /\, \mu m$')
     plt.tight_layout(.5)

@@ -20,15 +20,16 @@ import datetime
 import peakutils
 
 
-path = '/home/sei/Spektren/heated/'
+path = '/home/sei/Spektren/'
 
-samples = ['p52m_dif5_D4']
+samples = ['A1_newlense_newsetup_100um']
 #samples = ['series_auto']
 
 
-maxwl = 1000
-minwl = 450
+maxwl = 900
+minwl = 500
 
+find_peaks = False
 
 for sample in samples:
     print(sample)
@@ -174,62 +175,64 @@ for sample in samples:
     plt.close()
 
 
-    peaks = peakutils.indexes(img[:, 10], thres=0.01, min_dist=300)
-    #peaks_x = peakutils.interpolate(wl[mask], img[:, 0], ind=peaks,width=50)
-    peaks = np.array(np.round(peaks),dtype=np.int)
-    print(peaks)
-    plt.plot(wl[mask],img[:, 10])
-    for xc in peaks:
-        plt.axvline(x=wl[mask][xc])
-    plt.tight_layout()
-    plt.savefig(savedir +'fit_example' + ".png",dpi=300)
-    plt.close()
+    if find_peaks:
+
+        peaks = peakutils.indexes(img[:, 10], thres=0.01, min_dist=300)
+        #peaks_x = peakutils.interpolate(wl[mask], img[:, 0], ind=peaks,width=50)
+        peaks = np.array(np.round(peaks),dtype=np.int)
+        print(peaks)
+        plt.plot(wl[mask],img[:, 10])
+        for xc in peaks:
+            plt.axvline(x=wl[mask][xc])
+        plt.tight_layout()
+        plt.savefig(savedir +'fit_example' + ".png",dpi=300)
+        plt.close()
 
 
-    maxs = np.zeros(img.shape[1])
-    peaks_x = np.zeros(img.shape[1],dtype=np.int)
-    peakindexes = np.zeros(img.shape[1],dtype=np.int)
-    for i in range(img.shape[1]):
-        peaks = peakutils.indexes(img[:,i], thres=0.01, min_dist=300)
-        #peaks = np.array(np.round(peakutils.interpolate(wl[mask], img[:,i], ind=peaks,width=50)),dtype=np.int)
-        peaks = peaks[peaks > 0]
-        peaks = peaks[peaks < img.shape[0]]
-        a = img[peaks,i]
-        sorted = np.argsort(a)
-        peaks = peaks[sorted]
-        #print(peaks)
-        #print(a[sorted])
-        peakindexes[i] = peaks[-1]
-        maxs[i] = img[peakindexes[i],i]
+        maxs = np.zeros(img.shape[1])
+        peaks_x = np.zeros(img.shape[1],dtype=np.int)
+        peakindexes = np.zeros(img.shape[1],dtype=np.int)
+        for i in range(img.shape[1]):
+            peaks = peakutils.indexes(img[:,i], thres=0.01, min_dist=300)
+            #peaks = np.array(np.round(peakutils.interpolate(wl[mask], img[:,i], ind=peaks,width=50)),dtype=np.int)
+            peaks = peaks[peaks > 0]
+            peaks = peaks[peaks < img.shape[0]]
+            a = img[peaks,i]
+            sorted = np.argsort(a)
+            peaks = peaks[sorted]
+            #print(peaks)
+            #print(a[sorted])
+            peakindexes[i] = peaks[-1]
+            maxs[i] = img[peakindexes[i],i]
 
-    maxs = maxs/maxs[0]
-    plt.plot(dt,maxs, color = "black", linewidth=1)
-    plt.ylabel(r'$I_{df} [a.u.]$')
-    plt.xlabel(r'$t [min]$')
-    #plt.legend(files)
-    plt.tight_layout()
-    plt.savefig(savedir +'trace_max' + ".png",dpi=300)
-    plt.close()
+        maxs = maxs/maxs[0]
+        plt.plot(dt,maxs, color = "black", linewidth=1)
+        plt.ylabel(r'$I_{df} [a.u.]$')
+        plt.xlabel(r'$t [min]$')
+        #plt.legend(files)
+        plt.tight_layout()
+        plt.savefig(savedir +'trace_max' + ".png",dpi=300)
+        plt.close()
 
-    maxs = np.zeros(img.shape[1])
-    for i in range(img.shape[1]):
-        maxs[i] = img[(np.argmin(np.abs(wl[mask]-750))),i]
+        maxs = np.zeros(img.shape[1])
+        for i in range(img.shape[1]):
+            maxs[i] = img[(np.argmin(np.abs(wl[mask]-750))),i]
 
-    maxs = maxs/maxs[0]
-    plt.plot(dt,maxs, color = "black", linewidth=1)
-    plt.ylabel(r'$I_{df} [a.u.]$')
-    plt.xlabel(r't [min]$')
-    #plt.legend(files)
-    plt.tight_layout()
-    plt.savefig(savedir +'trace' + ".png",dpi=300)
-    plt.close()
+        maxs = maxs/maxs[0]
+        plt.plot(dt,maxs, color = "black", linewidth=1)
+        plt.ylabel(r'$I_{df} [a.u.]$')
+        plt.xlabel(r't [min]$')
+        #plt.legend(files)
+        plt.tight_layout()
+        plt.savefig(savedir +'trace' + ".png",dpi=300)
+        plt.close()
 
-    maxs = wl[peakindexes]
-    plt.plot(dt, maxs, color="black", linewidth=1)
-    plt.ylabel(r'$I_{df} [a.u.]$')
-    plt.xlabel(r't [min]$')
-    #plt.ylim([595,615])
-    # plt.legend(files)
-    plt.tight_layout()
-    plt.savefig(savedir + 'peak_wl' + ".png", dpi=300)
-    plt.close()
+        maxs = wl[peakindexes]
+        plt.plot(dt, maxs, color="black", linewidth=1)
+        plt.ylabel(r'$I_{df} [a.u.]$')
+        plt.xlabel(r't [min]$')
+        #plt.ylim([595,615])
+        # plt.legend(files)
+        plt.tight_layout()
+        plt.savefig(savedir + 'peak_wl' + ".png", dpi=300)
+        plt.close()

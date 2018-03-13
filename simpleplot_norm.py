@@ -24,8 +24,8 @@ from scipy.signal import savgol_filter
 path = '/home/sei/Spektren/A1_newlense_newsetup_100um/'
 
 
-maxwl = 1010
-minwl = 450
+maxwl = 900
+minwl = 500
 
 wl, lamp = np.loadtxt(open(path + "lamp.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
 wl, dark = np.loadtxt(open(path + "dark.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
@@ -122,6 +122,7 @@ plt.xlabel(r'$\lambda [nm]$')
 #plt.legend(files)
 plt.tight_layout()
 plt.savefig(path +'Overview' + ".png",dpi=300)
+plt.savefig(path +'Overview' + ".pgf")
 plt.close()
 
 plt.imshow(img.T,extent=[wl.min(),wl.max(),0,len(files)],aspect=10,cmap='plasma')
