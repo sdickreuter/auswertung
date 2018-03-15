@@ -21,16 +21,19 @@ try:
 except ImportError:
     import pickle
 
-path = '/home/sei/Spektren/pranoti/'
+#path = '/home/sei/Spektren/pranoti/'
+path = '/home/sei/Spektren/michael/'
 
-samples = ['E 10283 B1 0.5s line']
+#samples = ['E 10283 B1 0.5s line']
 #samples = ['E 10287 D6 2s line','E 10287 A2 5s line','E 10284 D7 10s line','E 10283 B2 0.5s line']
+#samples = ['E10287 A1 linescan']
+samples = ['2908 1s line','2908_2 2s line','2900_E45 0s line']
+#samples = ['2900_E45']
+
 
 
 minwl = 400
-maxwl = 700
-nx = 50
-ny = 50
+maxwl = 1000
 
 
 letters = [chr(c) for c in range(65, 91)]
@@ -88,14 +91,14 @@ for sample in samples:
     # for i in range(len(files)):
     #     file = files[i]
     #     wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
-    #     counts = 1 - (counts - dark) / (lamp - dark)
+    #     counts = (counts - dark) / (lamp - dark)
     #
     #     counts[np.where(counts == np.inf)] = 0.0
     #     filtered = savgol_filter(counts, 27, 1, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
     #     newfig(0.9)
     #     plt.plot(wl[mask], counts[mask], color="grey", linewidth=0.5)
     #     plt.plot(wl[mask], filtered[mask], color="black", linewidth=0.5)
-    #     plt.ylabel(r'$apsorption$')
+    #     plt.ylabel(r'$transmission$')
     #     plt.xlabel(r'$\lambda\, /\, nm$')
     #     plt.xlim((minwl, maxwl))
     #     #plt.ylim([np.min(filtered[mask]), np.max(filtered[mask]) * 1.2])
@@ -104,12 +107,12 @@ for sample in samples:
     #     plt.savefig(savedir + "plots/" + file[:-4] + ".pdf", dpi=300)
     #     #plt.savefig(savedir + "plots/" + file[-4] + ".pgf")
     #     plt.close()
-    #
-    #     f = open(savedir + "specs/" + file[:-4] + ".csv", 'w')
-    #     f.write("wavelength,intensity" + "\r\n")
-    #     for z in range(len(counts)):
-    #         f.write(str(wl[z]) + "," + str(counts[z]) + "\r\n")
-    #     f.close()
+    # #
+    # #     f = open(savedir + "specs/" + file[:-4] + ".csv", 'w')
+    # #     f.write("wavelength,intensity" + "\r\n")
+    # #     for z in range(len(counts)):
+    # #         f.write(str(wl[z]) + "," + str(counts[z]) + "\r\n")
+    # #     f.close()
 
 
     x = np.zeros((len(files)))

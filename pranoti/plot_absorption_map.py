@@ -20,13 +20,14 @@ except ImportError:
 
 path = '/home/sei/Spektren/pranoti/'
 
-#samples = ['E 10284 D7 10s map']
-samples = ['E 10283 E9 0.0s map', 'E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
+
+samples = ['E 10283 A1 1s map']
+#samples = ['E 10283 E9 0.0s map', 'E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
 
 fliplr = False
 flipud = False
 pickle_data = False
-plot_pointspectra = True
+plot_pointspectra = False
 
 
 minwl = 400
@@ -293,6 +294,8 @@ for sample in samples:
             counts = 1 - (counts - dark) / (lamp - dark)
             ax2.plot(wl,1-counts,color=colors[i],zorder=10-i)
 
+        #img[59,0] = 1
+
         ax2.set_ylabel(r'$T^{rel}_{'+str(minwl)+'-'+str(maxwl)+r'\,nm}$')
         ax2.set_xlabel(r'$\lambda\, /\, nm$')
         ax2.set_xlim((minwl, maxwl))
@@ -311,6 +314,20 @@ for sample in samples:
         plt.tight_layout()
         plt.savefig(savedir + "overview/" + "map_check.pdf", dpi=300)
         plt.close()
+
+
+
+    img[59, 0] = 0
+    plt.imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
+               extent=extents(xy[:, 0]) + extents(xy[:, 1]), origin='lower')
+    #plt.xlim(extents(xy[0, 0]), extents(xy[1, 0]))
+    #plt.ylim(extents(xy[0, 1]), extents(xy[1, 1]))
+    plt.xlim(0, nx * dx-1)
+    plt.ylim(0, ny * dy-1)
+    plt.tight_layout()
+    plt.savefig(savedir + "overview/" + "ref_check.pdf", dpi=300)
+    plt.close()
+
 
 
     #

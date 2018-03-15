@@ -129,12 +129,14 @@ def asSpherical(xyz):
     phi     =  np.arctan2(y,x)
     return r,theta,phi
 
-#path = '/home/sei/MNPBEM/10degillu/'
+path = '/home/sei/MNPBEM/dimer_2nmOx/'
 #path = '/home/sei/MNPBEM/new_version/'
 #path = '/home/sei/MNPBEM/dimer_nonlocal/'
 #path = '/home/sei/MNPBEM/dimer_nosub_dipole/'
-path = '/home/sei/MNPBEM/dimer_nosub/'
-#path = '/home/sei/MNPBEM/single_nosub/'
+#path = '/home/sei/MNPBEM/dimer_nosub/'
+#path = '/home/sei/MNPBEM/single_horzpol_nosub/'
+#path = '/home/sei/MNPBEM/dimer_horzpol/'
+#path = '/home/sei/MNPBEM/dimer_nosub_dipole/'
 
 
 diameter = 90#nm
@@ -530,9 +532,9 @@ for n,sim in enumerate(sims):
             # plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.pdf", dpi=1200)
             # #plt.show()
             # plt.close()
-
-            verts[verts[:, 0] > 0, 0] -= 20
-            verts[verts[:, 0] < 0, 0] += 20
+            #
+            # verts[verts[:, 0] > 0, 0] -= 20
+            # verts[verts[:, 0] < 0, 0] += 20
 
             val = np.real(sig2[ind])
             fig = plt.figure()
@@ -544,7 +546,8 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            #colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)
@@ -570,7 +573,8 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            #colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)
@@ -596,7 +600,8 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            #colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)

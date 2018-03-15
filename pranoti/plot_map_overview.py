@@ -93,7 +93,7 @@ for i in range(len(samples)):
 
     #data_extent = (x_new.min(), x_new.max(), y_new.min(), y_new.max())
     #ims.append( grid[i].imshow(img, extent=data_extent, cmap=plt.get_cmap('viridis'), interpolation="nearest", clim=[0,1],origin="lower") )
-    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('gray'),
+    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('cubehelix'),
                extent=extents(x_new) + extents(y_new), origin='lower', clim=[0,1.1]) )
 
 
