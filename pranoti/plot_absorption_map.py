@@ -21,12 +21,15 @@ except ImportError:
 path = '/home/sei/Spektren/pranoti/'
 
 
-samples = ['E 10283 A1 1s map']
+#samples = ['E10287 A1 5s highres']
 #samples = ['E 10283 E9 0.0s map', 'E 10283 C1 0.2s map','E 10283 A1 1s map','E 10284 D7 10s map']
+#samples = ['E10287 A3 5s','E10287 A7 2s','E10287 A1 5s']
+samples = ['E10287 A7 2s']
+
 
 fliplr = False
 flipud = False
-pickle_data = False
+pickle_data = True
 plot_pointspectra = False
 
 
@@ -119,7 +122,7 @@ for sample in samples:
 
     files = []
     for file in os.listdir(savedir):
-        if re.fullmatch(r"([A-Z]{1,2}[0-9]{1,2})(.csv)$", file) is not None:
+        if re.fullmatch(r"([A-Z]{1,5}[0-9]{1,5})(.csv)$", file) is not None:
             files.append(file)
 
     print(len(files))
@@ -171,9 +174,17 @@ for sample in samples:
         meta = open(savedir + file, "rb").readlines(300)
         xy[i, 0] = float(meta[11].decode())
         xy[i, 1] = float(meta[13].decode())
+        #print('x: '+str(xy[i, 0])+'  y: '+str(xy[i, 1]))
 
-    dx = np.round(np.diff(np.sort(xy[:,0])).max())
-    dy = np.round(np.diff(np.sort(xy[:,1])).max())
+    print(xy[:,0].min(),xy[:,0].max())
+    print(xy[:, 1].min(), xy[:, 1].max())
+
+    dx = np.round(np.diff(np.sort(xy[:,0])).max(),0)#,1)
+    dy = np.round(np.diff(np.sort(xy[:,1])).max(),0)#,1)
+
+    #dy = dx
+
+    print((dx,dy))
 
     xy[:,0] -= xy[:,0].min()
     xy[:,0] /= dx
@@ -203,8 +214,6 @@ for sample in samples:
     # use lower right corner as reference
     wl, lamp = np.loadtxt(open(savedir + files[index_matrix[59,0]], "rb"), delimiter=",", skiprows=16, unpack=True)
     print('Reference file: '+files[index_matrix[59,0]])
-
-
 
 
 
@@ -239,8 +248,8 @@ for sample in samples:
     plt.savefig(path + sample + ".png", dpi=1200)
     plt.close()
 
-    x = np.linspace(0, img.shape[0],img.shape[0]) + dx
-    y = np.linspace(0,img.shape[1],img.shape[1]) + dy
+    x = np.linspace(0, img.shape[0],img.shape[0])*dx + dx
+    y = np.linspace(0,img.shape[1],img.shape[1])*dy + dy
 
     print(img.shape)
     print(x.shape)
@@ -252,7 +261,6 @@ for sample in samples:
 
 
     if plot_pointspectra:
-
 
         xyIndices = GetIndices(img)
         plt.show()

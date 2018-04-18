@@ -27,6 +27,13 @@ x0s = [35,31,35,27]
 y0s = [34,31,32,32]
 
 
+# samples = ['E 10283 B9 0.0s map','E 10283 A1 1s map','E10287 A3 5s','E 10284 D7 10s map']
+# x0s = [35,35,27,27]
+# y0s = [34,32,30,32]
+
+
+
+
 halfwidth = 25#16
 
 seconds = []
@@ -93,7 +100,7 @@ for i in range(len(samples)):
 
     #data_extent = (x_new.min(), x_new.max(), y_new.min(), y_new.max())
     #ims.append( grid[i].imshow(img, extent=data_extent, cmap=plt.get_cmap('viridis'), interpolation="nearest", clim=[0,1],origin="lower") )
-    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('cubehelix'),
+    ims.append( grid[i].imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('gray'),
                extent=extents(x_new) + extents(y_new), origin='lower', clim=[0,1.1]) )
 
 
@@ -119,5 +126,5 @@ grid[3].cax.set_ylabel(r'$T^{rel}_{400-700\,nm}$')
 grid[3].cax.toggle_label(True)
 
 #plt.tight_layout()
-plt.savefig(path + "map_overview.png", dpi=1200)
+plt.savefig(path + "map_overview_grey.png", dpi=1200)
 plt.close()

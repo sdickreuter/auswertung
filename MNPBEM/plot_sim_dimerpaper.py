@@ -132,12 +132,12 @@ def asSpherical(xyz):
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
 #path = '/home/sei/MNPBEM/dimer_nonlocal/'
-path = '/home/sei/MNPBEM/dimer_1nmOx/'
+path = '/home/sei/MNPBEM/dimer_90nmOx/'
 diameter = 90#nm
 
 fit_peaks = False
 remove_exp = True
-plot_details = False
+plot_details = True
 plot_farfield = False
 
 #sims = ['dimer_r45nm_d2nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat']

@@ -129,7 +129,7 @@ def asSpherical(xyz):
     phi     =  np.arctan2(y,x)
     return r,theta,phi
 
-path = '/home/sei/MNPBEM/dimer_2nmOx/'
+path = '/home/sei/MNPBEM/dimer_1nmOx/'
 #path = '/home/sei/MNPBEM/new_version/'
 #path = '/home/sei/MNPBEM/dimer_nonlocal/'
 #path = '/home/sei/MNPBEM/dimer_nosub_dipole/'

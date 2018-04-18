@@ -21,7 +21,7 @@ try:
 except ImportError:
     import pickle
 
-path = '/home/sei/Spektren/michael/'
+path = '/home/sei/Spektren/pranoti/'
 
 files = []
 for file in os.listdir(path):

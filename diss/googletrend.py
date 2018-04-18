@@ -26,7 +26,7 @@ ax.set_xticks([2000,2005,2010,2015])
 #ax.set_yticks([5000,10000,15000,20000,25000])
 #ax.set_yticklabels(['5k','10k','15k','20k','25k'])
 ax.set_yticks([2000,4000,6000,8000,10000])
-ax.set_yticklabels(['2k','4k','6k','8k','10'])
+ax.set_yticklabels(['2k','4k','6k','8k','10k'])
 
 #formatter = mticker.ScalarFormatter(useMathText=True)
 #formatter.set_powerlimits((0,0))
