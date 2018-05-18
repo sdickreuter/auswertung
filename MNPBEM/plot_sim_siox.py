@@ -129,24 +129,14 @@ def asSpherical(xyz):
     phi     =  np.arctan2(y,x)
     return r,theta,phi
 
-#path = '/home/sei/MNPBEM/dimer_1nmOx/'
-#path = '/home/sei/MNPBEM/dimer_onlyox/'
-#path = '/home/sei/MNPBEM/new_version/'
-#path = '/home/sei/MNPBEM/dimer_nonlocal/'
-#path = '/home/sei/MNPBEM/dimer_nosub_dipole/'
-#path = '/home/sei/MNPBEM/dimer_nosub/'
-#path = '/home/sei/MNPBEM/single_horzpol_nosub/'
-#path = '/home/sei/MNPBEM/dimer_horzpol/'
-#path = '/home/sei/MNPBEM/dimer_nosub_dipole/'
-path = '/home/sei/MNPBEM/cone_chrissi/'
-
+path = '/home/sei/MNPBEM/dimer_siox/'
 
 diameter = 90#nm
 
 fit_peaks = False
 remove_exp = False
-plot_details = True
-plot_farfield = True
+plot_details = False
+plot_farfield = False
 
 #sims = ['dimer_r45nm_d2nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat']
 #sims = ['1nm dist/dimer_r45nm_d5nm.mat','01nm dist/dimer_r45nm_d5nm.mat']
@@ -167,29 +157,27 @@ print(sims)
 #gaps = np.repeat(0,len(sims))
 
 
-sims = ['cone_chrissi_r50nm_h130nm_1nmOx.mat']
-gaps = np.array([0],dtype=np.int)
+# sims = ['dimer_45degillu_r45nm_d10nm_theta10_1nm0x_5nmflatxz.mat']
 
 # gaps = []
 # for sim in sims:
 #    print(re.search('(d)([0-9]{1,2})(nm)', sim).group(2))
 #    gaps.append( re.search('(d)([0-9]{1,2})(nm)', sim).group(2)  )
 
-# gaps = []
-# for sim in sims:
-#     try:
-#         print(re.search('(d)([0-9]{1,2})', sim).group(2))
-#         gaps.append( re.search('(d)([0-9]{1,2})', sim).group(2)  )
-#     except AttributeError as e:
-#         print(sim+' not a valid simulation file')
-#         sims.remove(sim)
-#
-# gaps = np.array(gaps,dtype=np.int)
+siox = []
+for sim in sims:
+    try:
+        print(re.search('(_)([0-9]{1,3})', sim).group(2))
+        siox.append(re.search('(_)([0-9]{1,3})', sim).group(2))
+    except AttributeError as e:
+        print(sim+' not a valid simulation file')
+        sims.remove(sim)
 
+siox = np.array(siox, dtype=np.int)
 sims = np.array(sims)
 
-sorted = np.argsort(gaps)
-gaps = gaps[sorted]
+sorted = np.argsort(siox)
+siox = siox[sorted]
 sims = sims[sorted]
 
 savedir = path+'plots/'
@@ -201,14 +189,15 @@ except:
 
 
 
-peakwl_scat = np.zeros(len(gaps),dtype=np.object)
-peakwl_charge = np.zeros(len(gaps),dtype=np.object)
-width_scat = np.zeros(len(gaps),dtype=np.object)
+peakwl_scat = np.zeros(len(siox), dtype=np.object)
+peakwl_charge = np.zeros(len(siox), dtype=np.object)
+width_scat = np.zeros(len(siox), dtype=np.object)
 
 
 mat = sio.loadmat(path + sims[0])
 wl = mat['enei'][0]
 img = np.zeros((len(wl),len(sims)))
+img_charge = np.zeros((len(wl),len(sims)))
 
 
 for n,sim in enumerate(sims):
@@ -225,7 +214,7 @@ for n,sim in enumerate(sims):
 
     #p = sio.loadmat(path + 'quad_p.mat')
 
-    p = mat['p0'] #mat['p']
+    p =mat['p']
 
     sig1 = np.zeros(len(wl),dtype=np.object)
     sig2 = np.zeros(len(wl),dtype=np.object)
@@ -365,6 +354,7 @@ for n,sim in enumerate(sims):
     plt.close()
     peakwl_charge[n] = wl[indexes_charge]
 
+    img_charge[:,n] = charge
 
     if fit_peaks:
         if remove_exp:
@@ -540,6 +530,7 @@ for n,sim in enumerate(sims):
             # verts[verts[:, 0] > 0, 0] -= 20
             # verts[verts[:, 0] < 0, 0] += 20
 
+
             val = np.real(sig2[ind])
             fig = plt.figure()
             ax = Axes3D(fig)
@@ -682,13 +673,13 @@ print(width_scat)
 
 if fit_peaks:
     fig, ax1 = plt.subplots()
-    for i in range(len(gaps)):
+    for i in range(len(siox)):
         for peakwl in peakwl_scat[i]:
-            ax1.scatter(gaps[i],peakwl,color='C0')
+            ax1.scatter(siox[i], peakwl, color='C0')
 
-    for i in range(len(gaps)):
+    for i in range(len(siox)):
         for peakwl in peakwl_charge[i]:
-            ax1.scatter(gaps[i],peakwl,color='C1')
+            ax1.scatter(siox[i], peakwl, color='C1')
 
     ax1.set_ylabel("Peak Wavelength / nm")
     ax1.set_xlabel("Gap Width / nm")
@@ -701,10 +692,10 @@ if fit_peaks:
 
 
     fig, ax1 = plt.subplots()
-    for i in range(len(gaps)):
+    for i in range(len(siox)):
         # for peakwl in peakwl_scat[i]:
         #     ax1.scatter(gaps[i]/diameter,peakwl.max(),color='C0')
-        ax1.scatter(gaps[i] / diameter, peakwl_scat[i].max(), color='C0')
+        ax1.scatter(siox[i] / diameter, peakwl_scat[i].max(), color='C0')
     ax1.set_ylabel("Peak Wavelength / nm")
     ax1.set_xlabel("Gap / Diameter")
     plt.tight_layout()
@@ -715,10 +706,10 @@ if fit_peaks:
 
 
     fig, ax1 = plt.subplots()
-    for i in range(len(gaps)):
+    for i in range(len(siox)):
         # for peakwl in peakwl_scat[i]:
         #     ax1.scatter(gaps[i]/diameter,peakwl.max(),color='C0')
-        ax1.scatter(gaps[i] / diameter, width_scat[i][0], color='C0')
+        ax1.scatter(siox[i] / diameter, width_scat[i][0], color='C0')
     ax1.set_ylabel("Peak Wavelength / nm")
     ax1.set_xlabel("Gap / Diameter")
     plt.tight_layout()
@@ -731,7 +722,7 @@ if fit_peaks:
     #img = img.T
     #newfig(0.9)
     fig = plt.figure()
-    plt.imshow(img.T, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), gaps.max(), gaps.min()], norm=colors.LogNorm())
+    plt.imshow(img.T, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), siox.max(), siox.min()], norm=colors.LogNorm())
     plt.ylabel(r'$gap\, /\, nm$')
     plt.xlabel(r'$\lambda\, /\, nm$')
     plt.tight_layout()
@@ -743,7 +734,7 @@ if fit_peaks:
     #newfig(0.9)
     fig = plt.figure()
     plt.tight_layout()
-    plt.imshow(img.T, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), gaps.max(), gaps.min()])
+    plt.imshow(img.T, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), siox.max(), siox.min()])
     plt.ylabel(r'$gap\, /\, nm$')
 
     plt.xlabel(r'$\lambda\, /\, nm$')
@@ -754,8 +745,8 @@ if fit_peaks:
 
     x = []
     y = []
-    for i in range(len(gaps)):
-        x.append(gaps[i] / diameter)
+    for i in range(len(siox)):
+        x.append(siox[i] / diameter)
         y.append(peakwl_scat[i].max())
 
     x = np.array(x)
@@ -802,7 +793,7 @@ if fit_peaks:
 
 
     peaksx = []
-    for i in range(len(gaps)):
+    for i in range(len(siox)):
         peaksx.append(peakwl_scat[i].max())
 
     peaksx = np.array(peaksx)
@@ -823,7 +814,7 @@ if fit_peaks:
     max_int = 0
 
     # y_pos = dist/dist.max()
-    y_pos = np.linspace(0, 1, len(gaps))
+    y_pos = np.linspace(0, 1, len(siox))
 
     # img = np.zeros((len(wl),len(sims)))
 
@@ -845,7 +836,7 @@ if fit_peaks:
         ax.scatter(peaksx[i], y[np.abs(wl[mask] - peaksx[i]).argmin()] + y_pos[i], s=20, marker="x", color=colors[i])
         ax.set_xlim([450, 800])
 
-        labels_waterfall.append(str(round(gaps[i], 1)) + 'nm')
+        labels_waterfall.append(str(round(siox[i], 1)) + 'nm')
 
     # print(peaks)
     # print(peaks_err)
@@ -864,3 +855,178 @@ if fit_peaks:
     plt.savefig(path + "dimer_waterfall_simulation.pgf")
     plt.savefig(path + "dimer_waterfall_simulation.png", dpi=400)
     plt.close()
+else:
+    cmap = plt.get_cmap('plasma')
+    colors = [cmap(i) for i in np.linspace(0, 1, img.shape[1])]
+
+    fig, ax = newfig(0.5, 2.5)
+
+    ax.axvline(500, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax.axvline(600, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax.axvline(700, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+
+    dist_fac = 0.25
+    yticks = []
+    labels_waterfall = []
+    max_int = 0
+
+    # y_pos = dist/dist.max()
+    y_pos = np.linspace(0, 1, len(siox))
+
+    # img = np.zeros((len(wl),len(sims)))
+
+    mask = (wl >= 450) & (wl <= 800)
+
+    for i in list(reversed(range(img_charge.shape[1]))):
+        y = img[mask, i]
+        y -= y.min()
+        y /= img.max()
+        # y /= 4
+
+        ax.plot(wl[mask], y + y_pos[i], linewidth=1.0, color=colors[i],label=str(round(siox[i], 1)) + 'nm')
+
+        yticks.append(y_pos[i])
+
+        max_int = np.max([max_int, y.max() + y_pos[i]])
+
+        # ax.scatter(peak_wl,filtered[np.argmax(filtered)]+i*dist_fac,s=20,marker="x",color = colors[i])
+        ax.set_xlim([450, 800])
+
+        labels_waterfall.append(str(round(siox[i], 1)) + 'nm')
+
+    # print(peaks)
+    # print(peaks_err)
+    ax.set_ylabel(r'$I_{scat}\, /\, a.u.$')
+    ax.set_xlabel(r'$\lambda\, /\, nm$')
+    # ax.set_ylim([0, (len(pics)+1)*dist_fac*1.1])
+    ax.set_ylim([0, max_int * 1.05])
+
+    #ax.tick_params(axis='y', which='both', left='off', right='off', labelleft='off', labelright='on')
+    #ax.set_yticks(yticks)
+    #ax.set_yticklabels(labels_waterfall)
+
+    ax.tick_params(axis='y', which='both', left='off', right='off', labelleft='off', labelright='off')
+    #box = ax.get_position()
+    #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
+    plt.subplots_adjust(right=0.7)
+    leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),title="Oxid-Dicke")
+    leg.set_title("Oxid-Dicke")
+
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(path + "dimer_waterfall_simulation.pdf", dpi=400, bbox_inches="tight")
+    plt.savefig(path + "dimer_waterfall_simulation.pgf", bbox_inches="tight")
+    plt.savefig(path + "dimer_waterfall_simulation.png", dpi=400, bbox_inches="tight")
+    plt.close()
+
+
+    cmap = plt.get_cmap('plasma')
+    colors = [cmap(i) for i in np.linspace(0, 1, img.shape[1])]
+
+    fig, ax = newfig(0.5, 2.5)
+
+    ax.axvline(500, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax.axvline(600, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+    ax.axvline(700, color='black', linestyle='--', linewidth=0.5, alpha=0.5)
+
+    yticks = []
+    labels_waterfall = []
+    max_int = 0
+
+    # y_pos = dist/dist.max()
+    y_pos = np.linspace(0, 1, len(siox))
+
+    # img = np.zeros((len(wl),len(sims)))
+
+    mask = (wl >= 450) & (wl <= 800)
+
+    for i in list(reversed(range(img_charge.shape[1]))):
+        labels_waterfall.append(str(round(siox[i], 1)) + 'nm')
+
+        y = img_charge[mask, i]
+        y -= y.min()
+        y /= img_charge.max()
+        y /= 2
+
+        ax.plot(wl[mask], y + y_pos[i], linewidth=1.0, color=colors[i],label=str(round(siox[i], 1)) + 'nm')
+
+        yticks.append(y_pos[i])
+
+        max_int = np.max([max_int, y.max() + y_pos[i]])
+
+        # ax.scatter(peak_wl,filtered[np.argmax(filtered)]+i*dist_fac,s=20,marker="x",color = colors[i])
+        ax.set_xlim([450, 800])
+
+
+    # print(peaks)
+    # print(peaks_err)
+    ax.set_ylabel(r'$I_{scat}\, /\, a.u.$')
+    ax.set_xlabel(r'$\lambda\, /\, nm$')
+    # ax.set_ylim([0, (len(pics)+1)*dist_fac*1.1])
+    ax.set_ylim([0, max_int * 1.05])
+
+    #ax.tick_params(axis='y', which='both', left='off', right='off', labelleft='off', labelright='on')
+    #ax.set_yticks(yticks)
+    #ax.set_yticklabels(labels_waterfall)
+
+    ax.tick_params(axis='y', which='both', left='off', right='off', labelleft='off', labelright='off')
+    #box = ax.get_position()
+    #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
+    plt.subplots_adjust(right=0.7)
+    leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    leg.set_title("Oxid-Dicke")
+
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(path + "dimer_waterfall_charge_simulation.pdf", dpi=400, bbox_inches="tight")
+    plt.savefig(path + "dimer_waterfall_charge_simulation.pgf", bbox_inches="tight")
+    plt.savefig(path + "dimer_waterfall_charge_simulation.png", dpi=400, bbox_inches="tight")
+    plt.close()
+
+
+#newfig(0.9)
+fig, ax1 = plt.subplots()
+
+int_sca = []
+int_charge = []
+for i in range(img.shape[1]):
+    int_sca.append(img[mask, i].max())
+    int_charge.append(img_charge[mask, i].max())
+
+int_sca = np.array(int_sca)
+int_charge = np.array(int_charge)
+
+ax1.plot(siox, int_sca,color='C0',marker='.')
+ax1.set_xlabel(r'Oxid-Dicke $\, /\, nm$')
+ax1.set_ylabel(r'$I_{scat,max}\, /\, a.u.$',color='C0')
+ax1.tick_params('y', colors='C0')
+
+ax2 = ax1.twinx()
+ax2.set_ylabel(r'$\left|\sigma_{2}\right|_{max}\, /\, a.u.$',color='C1')
+ax2.plot(siox, int_charge,color='C1',marker='.')
+ax2.tick_params('y', colors='C1')
+
+plt.tight_layout()
+plt.savefig(path + "intensities.pdf")
+plt.savefig(path + "intensities.png", dpi=400)
+plt.savefig(path + "intensities.pgf")
+plt.close()
+
+
+fig, ax1 = plt.subplots()
+
+int_sca = []
+for i in range(img.shape[1]):
+    int_sca.append(img[mask, i].max())
+
+int_sca = np.array(int_sca)
+
+ax1.plot(siox, int_sca,color='C0',marker='.')
+ax1.set_xlabel(r'Oxid-Dicke $\, /\, nm$')
+ax1.set_ylabel(r'$I_{scat,max}\, /\, a.u.$')
+
+plt.tight_layout()
+plt.savefig(path + "scatterin_intensity.pdf")
+plt.savefig(path + "scatterin_intensity.png", dpi=400)
+plt.savefig(path + "scatterin_intensity.pgf")
+plt.close()

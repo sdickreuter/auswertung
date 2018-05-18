@@ -129,12 +129,12 @@ def asSpherical(xyz):
 
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
-path = '/home/sei/MNPBEM/cone/'
+path = '/home/sei/MNPBEM/cone_chrissi/'
 
 fit_peaks = False
-remove_exp = True
+remove_exp = False
 plot_details = True
-plot_farfield = False
+plot_farfield = True
 
 listdir = os.listdir(path)
 sims = []
@@ -240,6 +240,20 @@ for n,sim in enumerate(sims):
     verts = p['verts'][0][0]
     faces = p['faces'][0][0][:,0:3]
     faces = np.array(faces-1,dtype=np.int)
+
+    # x_min = verts[:, 0].min()
+    # x_max = verts[:, 0].max()
+    # y_min = verts[:, 1].min()
+    # y_max = verts[:, 1].max()
+    # z_min = verts[:, 2].min()
+    # z_max = verts[:, 2].max()
+
+    x_min = -55
+    x_max = 55
+    y_min = -55
+    y_max = 55
+    z_min = -5
+    z_max = 155
 
     NA = 0.7
     scat = np.zeros(len(wl))
@@ -435,30 +449,30 @@ for n,sim in enumerate(sims):
         #for ind in indexes_sca:
         for ind in indexes_charge:
 
-            val = np.real(sig2[ind])
-            fig = plt.figure()
-            ax = Axes3D(fig)
-            ax.axis('equal')
-            poly1 = plot_trimesh(verts,faces,val)
-            val1 = np.array(val)  # To be safe - set_array() will expect a numpy array
-            #val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
-            #val1_norm = val1
-            norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
-            colormap[:, -1] = 0.5
-            poly1.set_facecolor(colormap)
-            poly1.set_edgecolor(None)
-            poly1.set_linewidth(0.0)
-            #ax.add_collection3d(poly1)
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
-            #ax.autoscale_view()
-            plt.axis('off')
-            plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=1200)
-            #plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.pdf", dpi=1200)
-            #plt.show()
-            plt.close()
+            # val = np.real(sig2[ind])
+            # fig = plt.figure()
+            # ax = Axes3D(fig)
+            # ax.axis('equal')
+            # poly1 = plot_trimesh(verts,faces,val)
+            # val1 = np.array(val)  # To be safe - set_array() will expect a numpy array
+            # #val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
+            # #val1_norm = val1
+            # norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
+            # colormap = cm.seismic(norm(val1))
+            # colormap[:, -1] = 0.5
+            # poly1.set_facecolor(colormap)
+            # poly1.set_edgecolor(None)
+            # poly1.set_linewidth(0.0)
+            # #ax.add_collection3d(poly1)
+            # ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
+            # ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
+            # ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
+            # #ax.autoscale_view()
+            # plt.axis('off')
+            # plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=1200)
+            # #plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.pdf", dpi=1200)
+            # #plt.show()
+            # plt.close()
 
 
             val = np.real(sig2[ind])
@@ -471,15 +485,15 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)
             ax.add_collection3d(poly1)
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
-            #ax.autoscale_view()
+            ax.set_xlim3d(x_min, x_max)
+            ax.set_ylim3d(y_min, y_max)
+            ax.set_zlim3d(z_min, z_max)
+            ax.autoscale_view(tight=True)
             plt.axis('off')
             plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_top.png", dpi=1200)
             #plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_top.pdf", dpi=1200)
@@ -496,15 +510,15 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)
             ax.add_collection3d(poly1)
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
-            #ax.autoscale_view()
+            ax.set_xlim3d(x_min, x_max)
+            ax.set_ylim3d(y_min, y_max)
+            ax.set_zlim3d(z_min, z_max)
+            ax.autoscale_view(tight=True)
             plt.axis('off')
             plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_side.png", dpi=1200)
             #plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_side.pdf", dpi=1200)
@@ -521,15 +535,15 @@ for n,sim in enumerate(sims):
             val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
             #val1_norm = val1
             norm = colors.SymLogNorm(vmin=val1.min(), vmax=val1.max(),linthresh=0.1)
-            colormap = cm.seismic(norm(val1))
+            colormap = cm.RdBu(norm(val1))
             poly1.set_facecolor(colormap)
             poly1.set_edgecolor('white')
             poly1.set_linewidth(0.0)
             ax.add_collection3d(poly1)
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
-            #ax.autoscale_view()
+            ax.set_xlim3d(x_min, x_max)
+            ax.set_ylim3d(y_min, y_max)
+            ax.set_zlim3d(z_min, z_max)
+            ax.autoscale_view(tight=True)
             plt.axis('off')
             plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_bottom.png", dpi=1200)
             #plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm_bottom.pdf", dpi=1200)
@@ -539,7 +553,9 @@ for n,sim in enumerate(sims):
 
     if plot_farfield:
         for ind in indexes_sca:
-            gs = gridspec.GridSpec(1, 2, width_ratios=[10, 1], )
+            fig = plt.figure()
+
+            gs = gridspec.GridSpec(1, 2, width_ratios=[10, 0.5], )
 
             ax1 = plt.subplot(gs[0], projection="polar", aspect=1.)
             ax2 = plt.subplot(gs[1])
@@ -554,14 +570,19 @@ for n,sim in enumerate(sims):
 
             val = np.linalg.norm( 0.5 * np.real(np.cross(e[ind], np.conjugate(h[ind]))),axis=1)
 
-            theta2, phi2 = np.meshgrid(np.linspace(0,np.pi/2,500),np.linspace(-np.pi,np.pi,500))
+            theta2, phi2 = np.meshgrid(np.linspace(0,np.pi/2,32),np.linspace(-np.pi,np.pi,64))
             val2 = interpolate.griddata((theta, phi), val, (theta2, phi2), method='nearest', fill_value=0.0)
-            polarplot = ax1.pcolormesh(phi2,theta2, val2)
-            ax1.set_rticks([0.5, 1, 1.5])
-            ax1.set_rlabel_position(90)
+            polarplot = ax1.pcolormesh(phi2,theta2, val2,linewidth=0,rasterized=True)
+            #ax1.set_rgrids([0.5, 1, 1.5],zorder=10)
+            ax1.set_rticks([1])
+            #ax1.set_rticks([0.5, 1, 1.5],zorder=10)
+            #ax1.set_rlabel_position(90)
+            #ax1.grid(True)
             plt.colorbar(polarplot, cax=ax2)
+            gs.tight_layout(fig)
             plt.savefig(savedir + sim[:-4] + "_farfield_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=400)
-            #plt.savefig(savedir + sim[:-4] + "_farfield_at_"+ str(int(round(wl[ind]))) +"nm.pdf", dpi=1200)
+            #plt.savefig(savedir + sim[:-4] + "_farfield_at_"+ str(int(round(wl[ind]))) +"nm.pgf")
+            plt.savefig(savedir + sim[:-4] + "_farfield_at_"+ str(int(round(wl[ind]))) +"nm.pdf", dpi=1200)
 
             #plt.show()
             plt.close()

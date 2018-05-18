@@ -105,7 +105,7 @@ def asSpherical(xyz):
 
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
-path = '/home/sei/MNPBEM/single/'
+path = '/home/sei/MNPBEM/cone_chrissi/'
 
 
 #sims = ['dimer_r45nm_d2nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat']
@@ -171,7 +171,7 @@ for n,sim in enumerate(sims):
 
     img[:,n] = sca
 
-    p1 = mat['p1']
+    p1 = mat['p0']#mat['p1']
 
     sig1 = np.zeros(len(wl),dtype=np.object)
     sig2 = np.zeros(len(wl),dtype=np.object)

@@ -127,7 +127,6 @@ for sample in samples:
 
     print(len(files))
 
-
     # #wl, lamp = np.loadtxt(open(savedir + "lamp.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
     # # first measurement as reference !
     # wl, lamp = np.loadtxt(open(savedir + files[0], "rb"), delimiter=",", skiprows=16, unpack=True)
@@ -198,16 +197,29 @@ for sample in samples:
 
     print(xy[:,0].min(),xy[:,0].max())
     print(xy[:, 1].min(), xy[:, 1].max())
+    print(xy.shape)
 
     nx = xy[:,0].max()+1
     ny = xy[:, 1].max()+1
 
+    fig, ax1 = plt.subplots()
+    for i in range(xy.shape[0]):
+        ax1.scatter(x=xy[i,0],y=xy[i,1])
+        ax1.text(x=xy[i,0],y=xy[i,1],s=str(i),fontdict= {'size': 2})
+
+    #ax1.set_xlim([xy[i,0].min(),xy[i,0].max()])
+    #ax1.set_ylim([xy[i, 1].min(), xy[i, 1].max()])
+    ax1.set_axis_off()
+    plt.savefig(savedir + "overview/" + "indexmatrix.pdf", dpi=300)
+    #plt.savefig(path + sample + ".png", dpi=1200)
+    plt.close()
+
     img = np.zeros((nx,ny))
+    img_noref = np.zeros((nx,ny))
+
     index_matrix = np.zeros((nx,ny),dtype=np.int)
     for i in range(len(files)):
         index_matrix[xy[i,0],xy[i,1]] = i
-
-
 
 
     # mui importante!
@@ -216,13 +228,12 @@ for sample in samples:
     print('Reference file: '+files[index_matrix[59,0]])
 
 
-
     for i in range(len(files)):
         file = files[i]
         wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
         absorption = 1 - np.sum((counts[mask] - dark[mask])) / np.sum((lamp[mask] - dark[mask]))
         img[xy[i,0],xy[i,1]] = 1 - absorption
-
+        img_noref[xy[i,0],xy[i,1]] = np.sum((counts[mask] - dark[mask]))
 
 
     if fliplr:
@@ -234,6 +245,55 @@ for sample in samples:
 
     print(extents(xy[:, 0]))
     print(extents(xy[:, 1]))
+
+
+    reffiles = []
+    for i in index_matrix[56:60,0:4].ravel():
+        reffiles.append(files[i])
+
+    print(index_matrix[56:60,0:4].ravel())
+    print(reffiles)
+    fig, ax1 = plt.subplots()
+    sums = np.zeros(len(reffiles))
+    for i in range(len(reffiles)):
+        file = reffiles[i]
+        wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
+        ax1.plot(wl[mask], counts[mask]-dark[mask])
+        sums[i] = np.sum(counts[mask]-dark[mask])
+
+    plt.savefig(savedir + "overview/" + "references.pdf", dpi=300)
+    #plt.savefig(path + sample + ".png", dpi=1200)
+    plt.close()
+
+    fig, ax1 = plt.subplots()
+    ax1.plot(sums/sums.max())
+    plt.savefig(savedir + "overview/" + "references_sums.pdf", dpi=300)
+    #plt.savefig(path + sample + ".png", dpi=1200)
+    plt.close()
+
+    ref_img = img.copy()
+    ref_img[56:60,0:4] = 0
+    plt.imshow(ref_img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
+               extent=extents(xy[:, 0]) + extents(xy[:, 1]), origin='lower')
+    plt.xlim(0, nx * dx-1)
+    plt.ylim(0, ny * dy-1)
+    plt.tight_layout()
+    plt.savefig(savedir + "overview/" + "references_check.pdf", dpi=300)
+    plt.close()
+
+    img_noref /= img_noref[56:60,0:4].max()
+    plt.imshow(img_noref[56:60,0:4].T, interpolation='nearest', cmap=plt.get_cmap('viridis'), origin='lower')
+    plt.xlabel(r'$x\, /\, \mu m$')
+    plt.ylabel(r'$y\, /\, \mu m$')
+    cb = plt.colorbar()
+    #cb.set_label(r'$T^{rel}_{'+str(minwl)+'-'+str(maxwl)+r'\,nm}$')
+    plt.tight_layout()
+    plt.savefig(savedir + "overview/" + "references_img.pdf", dpi=300)
+    plt.close()
+
+
+
+
 
     plt.imshow(img.T, interpolation='nearest', cmap=plt.get_cmap('viridis'),
                extent=extents(xy[:,0]) + extents(xy[:,1]), origin='lower')
