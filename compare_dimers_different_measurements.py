@@ -43,6 +43,7 @@ print(nmpx)
 
 xerr = 3*nmpx
 
+diameter = 90 #nm
 
 maxwl = 950
 minwl = 450
@@ -223,3 +224,41 @@ plt.savefig(path + "compare_waterfall.pgf")
 plt.savefig(path + "compare_waterfall.png", dpi= 400)
 plt.close()
 
+
+
+
+def get_peakdata(peakfiles):
+
+    peaks = np.zeros(len(peakfiles))
+    amps = np.zeros(len(peakfiles))
+
+    for i, spec in zip(range(len(peakfiles)),peakfiles):
+
+        peakdata = np.loadtxt(open(peakfiles[i], "rb"), delimiter=",", skiprows=1, unpack=False)
+        if len(peakdata.shape) > 1:
+            peaks[i] = peakdata[0, 0]
+            amps[i] = peakdata[0,2]
+        else:
+            peaks[i] = peakdata[0]
+            amps[i] = peakdata[2]
+    return peaks, amps
+
+
+fig, ax = newfig(0.9)
+peaks, amps = get_peakdata(peakfiles_normal)
+ax.plot(dist/diameter,peaks, color='C0',linewidth=0.5)
+ax.scatter(dist/diameter,peaks, s=30, marker=".", color='C0',label='Ursprünglich')
+peaks, amps = get_peakdata(peakfiles_oxidized)
+ax.plot(dist/diameter,peaks, color='C1',linewidth=0.5)
+ax.scatter(dist/diameter,peaks, s=30, marker=".", color='C1',label='Oxidiert')
+peaks, amps = get_peakdata(peakfiles_reduced)
+ax.plot(dist/diameter,peaks, color='C2',linewidth=0.5)
+ax.scatter(dist/diameter,peaks, s=30, marker=".", color='C2',label='Reduziert')
+ax.set_ylabel("Resonanz-Wellenlänge / nm")
+ax.set_xlabel("Abstand / Durchmesser")
+plt.legend()
+plt.tight_layout()
+plt.savefig(path + "compare_peaks.pdf", dpi= 400)
+plt.savefig(path + "compare_peaks.pgf")
+plt.savefig(path + "compare_peaks.png", dpi= 400)
+plt.close()

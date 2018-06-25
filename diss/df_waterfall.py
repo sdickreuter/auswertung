@@ -28,7 +28,7 @@ sample = '2C1_75hept_B2'
 savedir = path + sample + '/overview/'
 loaddir = path + sample + '/specs/'
 
-maxwl = 1000
+maxwl = 900
 minwl = 400
 
 substrate = '2C1'
@@ -91,9 +91,12 @@ for i, f in zip(range(len(plot_files)),plot_files):
     mask = (wl >= minwl) & (wl <= maxwl)
     wl = wl[mask]
     counts = counts[mask]
+    #counts -= counts[-1]
     counts/=maximum
 
     ax.plot(wl,counts+y_pos[i], linewidth=1.0,color = colors[i])
+    #ax.arrow(900,y_pos[i],10,0,color=colors[i],linewidth=2.0)
+    ax.annotate("", xy=(920, y_pos[i]), xytext=(902, y_pos[i]), arrowprops = dict(color=colors[i],width=.4,headwidth=2.0,headlength=2.0))
 
     yticks.append(y_pos[i])
 

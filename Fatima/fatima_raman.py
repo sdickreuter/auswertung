@@ -7,7 +7,7 @@ import scipy.optimize as opt
 from scipy.optimize import curve_fit, basinhopping
 import scipy.sparse as sparse
 from scipy.special import *
-from plotsettings import *
+#from plotsettings import *
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import seaborn as sns

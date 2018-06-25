@@ -23,7 +23,7 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 #sample = "2C1"
 #arrays = ["2C1_75hept_B2"]
 
-arrays = ["p45m4"]
+arrays = ["p45m3"]
 
 
 letters = [chr(c) for c in range(65, 91)]
@@ -67,7 +67,8 @@ for array in arrays:
     #fig.subplots_adjust(hspace = .001, wspace=.001)
 
     size = figsize(1.0)
-    fig = plt.figure(figsize=(size[0],size[0]*0.85))
+    #fig = plt.figure(figsize=(size[0], size[0]))
+    fig = plt.figure(figsize=(size[0],size[0]*0.8))
     #fig.suptitle(sample+' '+array)
     gs1 = gridspec.GridSpec(nx, ny,wspace=0.01, hspace=0.0)
     #indices = np.arange(0,len(files),1)
@@ -80,9 +81,10 @@ for array in arrays:
             id = (letters[iy] + "{0:d}".format(ix+1))
             try:
                 #print(path + savedir + id+'_denoised.png')
-                img = np.asarray(PIL.Image.open(path + savedir + id+'_denoised.jpg'))
-                #print(img.shape)
-                img = img[50:(484-50),50:(712-50)]
+                #img = np.asarray(PIL.Image.open(path + savedir + id+'.png'))
+                img = np.asarray(PIL.Image.open(path + savedir + id + '_denoised.jpg'))
+                #img = img[40:(160 - 40), 40:(160 - 40)]
+                img = img[0:(484-0),60:(712-60)]
                 skip = False
             except:
                 img = np.zeros((100,100))
@@ -94,10 +96,12 @@ for array in arrays:
             #ax.text(1, img.shape[1] - 1, id, color="white", fontsize=8)
             if not skip:
                 ax.imshow(img, cmap="gray_r")
-                ax.text(0, -20, id, color="black", fontsize=8)
+                #ax.text(2, +10, id, color="white", fontsize=8)
+                ax.text(10, +65, id, color="white", fontsize=8)
+                #ax.text(0, -20, id, color="black", fontsize=8)
                 scalebar = AnchoredSizeBar(ax.transData,
                                            100/nmpx, '', 'lower right',
-                                           pad=0.1,
+                                           pad=0.2,
                                            color='white',
                                            frameon=False,
                                            size_vertical=1,label_top=True)
@@ -136,7 +140,8 @@ for array in arrays:
     #     #ax.set_title(file[:-4])
 
     #gs1.update(wspace=0.01, hspace=0.0) # set the spacing between axes.
-    gs1.tight_layout(fig,pad=1.0,h_pad=-0.5, w_pad=0.2)
+    #gs1.tight_layout(fig,pad=1.0,h_pad=-0.5, w_pad=0.2)
+    gs1.tight_layout(fig, pad=0.1, h_pad=0.2, w_pad=0.1)
 
     #plt.show()
     # plt.savefig(path+"overview/" + sample+'_'+array+ "_sem_overview.pdf", dpi= 300)

@@ -189,22 +189,10 @@ for n,sim in enumerate(sims):
         e[i] = mat['e'][0,i]
         h[i] = mat['h'][0,i]
 
-
-    # print(e[20][1:2])
-    # print(np.conj(h[20])[1:2])
-    # print(np.cross(e[20], np.conj(h[20]))[1:2])
-
     pinfty_verts = mat['pinfty']['verts'][0][0]
     pinfty_faces = mat['pinfty']['faces'][0][0][:,0:3]
     pinfty_faces = np.array(pinfty_faces-1,dtype=np.int)
     pinfty_pos = mat['pinfty']['pos'][0][0]
-
-
-    #verts = np.vstack( (p1['verts'][0][0],p2['verts'][0][0]))
-    #faces = np.vstack( (p1['faces'][0][0],p2['faces'][0][0]))[:,0:3]
-    verts1 = p1['verts'][0][0]
-    faces1 = p1['faces'][0][0][:,0:3]
-    faces1 = np.array(faces1-1,dtype=np.int)
 
     NA = 0.42
     scat = np.zeros(len(wl))
@@ -221,15 +209,7 @@ for n,sim in enumerate(sims):
         ind = theta < np.arcsin(NA)
         scat[i] = np.sum(S[ind])
 
-    plt.plot(wl,scat)
-    plt.plot(wl,sca)
-    indexes_sca = peakutils.indexes(sca, thres=0.001, min_dist=2)
-    plt.scatter(wl[indexes_sca],sca[indexes_sca])
-    for ind in indexes_sca:
-        plt.text(wl[ind],sca[ind],str(int(round(wl[ind]))))
-    plt.savefig(savedir + sim[:-4] + "_scattering.png", dpi=400)
-    #plt.show()
-    plt.close()
+    indexes_sca = peakutils.indexes(sca, thres=0.00001, min_dist=2)
     peakwl_scat[n] = wl[indexes_sca]
 
     charge = np.zeros(len(wl))
@@ -238,165 +218,46 @@ for n,sim in enumerate(sims):
         charge[i] = np.abs(np.real(sig2[i])).max()
 
     indexes_charge = peakutils.indexes(charge, thres=0.1, min_dist=2)
-    plt.scatter(wl[indexes_charge], charge[indexes_charge])
-    plt.plot(wl,charge)
-    for ind in indexes_charge:
-        plt.text(wl[ind],charge[ind],str(int(round(wl[ind]))))
-    plt.savefig(savedir + sim[:-4] + "_maxcharge.png", dpi=400)
-    #plt.show()
-    plt.close()
     peakwl_charge[n] = wl[indexes_charge]
 
+    indexes_sca = np.append(indexes_sca,np.argmin(np.abs(wl-520)))
 
-    #wls = [525,584,694]
-    #sca_buf = sca
-    #sca[wl < 500] = 0
-    #wls = [wl[np.argmax([sca])]]
-
-    if plot_details:
-        for ind in indexes_charge:
-            #ind = np.abs(wl - w).argmin()
-
-            #val = np.real((sig2[ind]+sig1[ind])/2)
-            val = np.real(sig1[ind])
-
-            fig = plt.figure()
-            #fig = plt.figure(figsize=plt.figaspect(1) * 1.5)  # Adjusts the aspect ratio and enlarges the figure (text does not enlarge)
-            #ax = fig.gca(projection='3d')
-            ax = Axes3D(fig)
-            #ax.set_aspect('equal')
-            ax.axis('equal')
-
-            poly1 = plot_trimesh(verts1,faces1,val[:len(faces1)])
-            val1 = np.array(val[:len(faces1)])  # To be safe - set_array() will expect a numpy array
-            val1_norm = (val1-val1.min()) / (val1.max() - val1.min())
-            colormap = cm.seismic(val1_norm)
-            colormap[:, -1] = 0.499*signal.sawtooth(2 * np.pi * val1_norm,0.5)+0.501
-            poly1.set_facecolor(colormap)
-            poly1.set_edgecolor(None)
-
-            ax.add_collection3d(poly1)
-
-            verts = verts1
-            #ax.auto_scale_xyz([verts[:,0].max(),verts[:,0].min()],[verts[:,1].max(),verts[:,1].min()],[verts[:,2].max(),verts[:,2].min()])
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
-            #ax.auto_scale_xyz(np.vstack((verts1[:, 0],verts2[:, 0])), np.vstack((verts1[:, 1],verts2[:, 1])), np.vstack((verts1[:, 2],verts2[:, 2])))
-            ax.axis('equal')
-            #ax.auto_scale_xyz(np.vstack((verts1[:, 0],verts2[:, 0])), np.vstack((verts1[:, 1],verts2[:, 1])), np.vstack((verts1[:, 2],verts2[:, 2])))
-            ax.auto_scale_xyz(verts[:, 0], verts[:, 1], verts[:, 2])
-            #plt.title('wl: '+str(round(wl[ind]))+'  max: '+str(round(val.max(),2)))
-            plt.axis('off')
-            plt.savefig(savedir + sim[:-4] + "_charge_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=400)
-            #plt.show()
-            plt.close()
+    for ind in indexes_sca:
 
 
-            gs = gridspec.GridSpec(1, 2, width_ratios=[10, 1], )
+        #ax1 = plt.subplot('111', projection="polar")
+        ax1 = plt.subplot('111')
 
-            ax1 = plt.subplot(gs[0], projection="polar", aspect=1.)
-            ax2 = plt.subplot(gs[1])
+        x = pinfty_pos[:,0]
+        y = pinfty_pos[:,1]
+        z = pinfty_pos[:,2]
 
-            x = pinfty_pos[:,0]
-            y = pinfty_pos[:,1]
-            z = pinfty_pos[:,2]
+        r = np.sqrt(x * x + y * y + z * z)
+        theta = np.arccos(z / r)
+        phi = np.arctan2(y, x)
 
-            r = np.sqrt(x * x + y * y + z * z)
-            theta = np.arccos(z / r)
-            phi = np.arctan2(y, x)
+        val = np.linalg.norm( 0.5 * np.real(np.cross(e[ind], np.conjugate(h[ind]))),axis=1)
 
-            val = np.linalg.norm( 0.5 * np.real(np.cross(e[ind], np.conjugate(h[ind]))),axis=1)
+        theta2, phi2 = np.meshgrid(np.linspace(0,np.pi/2,200),np.linspace(-np.pi,np.pi,200))
+        val2 = interpolate.griddata((theta, phi), val, (theta2, phi2), method='linear', fill_value=0.0)
 
-            theta2, phi2 = np.meshgrid(np.linspace(0,np.pi/2,500),np.linspace(-np.pi,np.pi,500))
-            val2 = interpolate.griddata((theta, phi), val, (theta2, phi2), method='nearest', fill_value=0.0)
-            polarplot = ax1.pcolormesh(phi2,theta2, val2)
-            ax1.set_rticks([0.5, 1, 1.5])
-            ax1.set_rlabel_position(90)
-            plt.colorbar(polarplot, cax=ax2)
-            plt.savefig(savedir + sim[:-4] + "_farfield_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=400)
-            #plt.show()
-            plt.close()
+        theta = np.linspace(0,np.pi/2,200)
+        phi = np.linspace(-np.pi,np.pi,200)
+        print(val2.shape)
 
-
-fig, ax1 = plt.subplots()
-for i in range(len(gaps)):
-    for peakwl in peakwl_scat[i]:
-        ax1.scatter(gaps[i],peakwl,color='C0')
-
-for i in range(len(gaps)):
-    for peakwl in peakwl_charge[i]:
-        ax1.scatter(gaps[i],peakwl,color='C1')
-
-ax1.set_ylabel("Peak Wavelength / nm")
-ax1.set_xlabel("Gap Width / nm")
-plt.savefig(savedir + sim[:-4] + "_spectral_shift.png", dpi=400)
-#plt.show()
-plt.close()
-
-img = img.T
-#newfig(0.9)
-fig = plt.figure()
-plt.imshow(img, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), 0, len(sims)], norm=colors.LogNorm())
-plt.ylabel(r'$number of measurement$')
-plt.xlabel(r'$\lambda\, /\, nm$')
-#plt.savefig(savedir + sim[:-4] + "_image_log.pdf")
-plt.savefig(savedir + sim[:-4] + "_image_log.png", dpi=400)
-# plt.savefig(savedir + "plots/" + file[-4] + ".pgf")
-plt.close()
-
-#newfig(0.9)
-fig = plt.figure()
-plt.imshow(img, aspect='auto', cmap=plt.get_cmap("viridis"), extent=[wl.min(), wl.max(), 0, len(sims)])
-plt.ylabel(r'$number of measurement$')
-plt.xlabel(r'$\lambda\, /\, nm$')
-#plt.savefig(savedir + sim[:-4] + "_image.pdf")
-plt.savefig(savedir + sim[:-4] + "_image.png", dpi=400)
-# plt.savefig(savedir + "plots/" + file[-4] + ".pgf")
-plt.close()
+        val3 = np.sum(val2,axis=0)
+        # val3 = np.zeros(val2.shape[1])
+        # for i in range(val2.shape[1]):
+        #     val3[i] = val2[:,i].max()
 
 
+        polarplot = ax1.plot(theta*180/np.pi,val3)
+        ax1.axvline(np.arcsin(0.45)*180/np.pi,linestyle='--')
+        ax1.axvline(np.arcsin(0.9)*180/np.pi, linestyle='--')
+        ax1.set_xlabel("Abstrahl-Winkel")
+        ax1.set_ylabel("gestreute Intensität")
+        plt.savefig(savedir + sim[:-4] + "_emissionpattern_at_"+ str(int(round(wl[ind]))) +"nm.png", dpi=400)
+        #plt.show()
+        plt.close()
 
 
-
-# midpoints = np.zeros((len(faces1),3))
-    # for f in range(len(faces1)):
-    #     midpoints[f] = np.sum(verts1[faces1[f,:],:],axis=0)/3
-    #
-    # midpoints -= np.mean(midpoints,axis=0)
-    #
-    # theta = np.zeros((len(faces1)))
-    # phi = np.zeros((len(faces1)))
-    # for i in range(len(midpoints)):
-    #     r, theta[i], phi[i] = asSpherical(midpoints[i])
-    #
-    # fig = plt.figure()
-    # ax = fig.gca(projection='3d')
-    # ax.set_aspect('equal')
-    # ax.scatter(midpoints[:,0],midpoints[:,1],midpoints[:,2])
-    #
-    # pts = np.zeros((len(theta),2))
-    # pts[:,0] = theta
-    # pts[:,1] = phi
-    # tri = Delaunay(pts)
-    # centers = np.sum(pts[tri.simplices], axis=1, dtype='int')/3.0
-    # print(centers.shape)
-    # #plt.tripcolor(pts[:,0], pts[:,1], tri.simplices.copy(), facecolors=val[:len(faces1)], edgecolors='k')
-    # plt.tripcolor(pts[:,0], pts[:,1], tri.simplices.copy())
-    # plt.gca().set_aspect('equal')
-    # plt.show()
-
-
-    # plt.show()
-    # plt.scatter(theta,phi,val[:len(faces1)])
-    # plt.show()
-
-
-    # verts1 -= np.mean(verts1,axis=0)
-    # theta = np.zeros((len(verts1)))
-    # phi = np.zeros((len(verts1)))
-    # for i in range(len(verts1)):
-    #     r, theta[i], phi[i] = asSpherical(verts1[i])
-    #
-    # plt.tripcolor(theta, phi, faces1, facecolors=val[:len(faces1)], edgecolors='k')
-    # plt.show()

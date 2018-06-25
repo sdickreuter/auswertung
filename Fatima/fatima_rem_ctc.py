@@ -2,10 +2,11 @@ __author__ = 'sei'
 
 import os
 
-#from plotsettings import *
+from plotsettings import *
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
+
 sns.set_context("paper")
 sns.set_style("ticks")
 
@@ -30,266 +31,293 @@ from scipy.signal import savgol_filter
 import peakutils
 from scipy import fftpack
 
-nmppx = 1000/610  # nm/px
+# path = '/home/sei/REM/Fatima2/'
+# path = '/home/sei/Nextcloud/fatima/'
+# path = '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 35000x/'
+
+paths = ['/home/sei/REM/Nadim/Größenverteilung/8min Reihe 19.06/',
+         '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 35000x/',
+         '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 50000x/',
+         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 20ed 21.06/',
+         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 15000x/',
+         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 35000x/',
+         ]
+
+#paths = ['/home/sei/REM/Nadim/Größenverteilung/8min Reihe 19.06/']
+
+for path in paths:
+
+    # nmppx = 1000/204#1000/610  # nm/px
+    try:
+        nmppx = np.loadtxt(path + "nmppx")
+    except:
+        raise RuntimeError("nmppx not found!")
+
+    savedir = path + 'plots/'
+
+    show_plots = False
+    cut_rem = True
+
+    try:
+        os.mkdir(savedir)
+    except:
+        pass
 
 
-#path = '/home/sei/REM/Fatima2/'
-path = '/home/sei/Nextcloud/fatima/'
-savedir = path + 'plots/'
-
-show_plots = False
-
-try:
-    os.mkdir(savedir)
-except:
-    pass
-
-def gauss(x, amplitude, x0, sigma):
-    g = amplitude *np.exp(-np.square((x-x0)/(2*sigma)))
-    return g.ravel()
+    def gauss(x, amplitude, x0, sigma):
+        g = amplitude * np.exp(-np.square((x - x0) / (2 * sigma)))
+        return g.ravel()
 
 
-files = []
-for file in os.listdir(path):
-    if re.search(r"\.(tif)$", file) is not None:
-        files.append(file)
+    files = []
+    for file in os.listdir(path):
+        if re.search(r"\.(TIF)$", file) is not None:
+            files.append(file)
 
-print(files)
-do_erosion = [1,1,1,1,1,1]
-print(do_erosion)
+    print(files)
+    do_erosion = [1, 1, 1, 1, 1, 1]
+    print(do_erosion)
 
-#file = path+files[0]
+    # file = path+files[0]
 
-# # Open image file for reading (binary mode)
-# with open(path+file, 'rb') as f:
-#     tags = exifread.process_file(f)
-#     for tag in tags.keys():
-#         #if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename', 'EXIF MakerNote'):
-#         print("Key: %s, value %s" % (tag, tags[tag]))
+    # # Open image file for reading (binary mode)
+    # with open(path+file, 'rb') as f:
+    #     tags = exifread.process_file(f)
+    #     for tag in tags.keys():
+    #         #if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename', 'EXIF MakerNote'):
+    #         print("Key: %s, value %s" % (tag, tags[tag]))
 
+    coverage = np.array([])
+    n = np.array([])
+    area_mean = np.array([])
+    area_err = np.array([])
 
-coverage = np.array([])
-n = np.array([])
-area_mean = np.array([])
-area_err = np.array([])
+    labels = np.array([])
 
-labels = np.array([])
+    ctc = []
+    ctc_fwhm = []
+    radii = []
+    radii_fwhm = []
 
-ctc = []
-ctc_fwhm = []
-radii = []
-radii_fwhm = []
+    for f, file in enumerate(files):
+        print(file)
+        labels = np.append(labels, file[:-4])
 
+        pic = scipy.misc.imread(path + file)
+        # print("Image Size: " + str(pic.shape))
+        # pic = pic[:1780,:]
+        if cut_rem:
+            pic = pic[:-60, :]
 
-for f,file in enumerate(files):
-    print(file)
-    labels = np.append(labels, file[:-4])
+        pic = exposure.rescale_intensity(pic)
 
-    pic = scipy.misc.imread(path+file)
-    #print("Image Size: " + str(pic.shape))
-    pic = pic[:1780,:]
-    pic = exposure.rescale_intensity(pic)
+        ffile = path + file[:-4] + '_denoised.jpg'
+        if os.path.isfile(ffile):
+            pic = scipy.misc.imread(ffile)
+        else:
+            pic = denoise_bilateral(pic, sigma_color=0.1, sigma_spatial=3, multichannel=False)
+            # pic = denoise_bilateral(pic, sigma_color=0.01, sigma_spatial=1, multichannel=False)
+            scipy.misc.imsave(ffile, pic)
 
-    ffile = path+file[:-4] + '_denoised.jpg'
-    if os.path.isfile(ffile):
-        pic = scipy.misc.imread(ffile)
-    else:
-        pic = denoise_bilateral(pic, sigma_color=0.1, sigma_spatial=3, multichannel=False)
-        #pic = denoise_bilateral(pic, sigma_color=0.01, sigma_spatial=1, multichannel=False)
-        scipy.misc.imsave(ffile, pic)
+        # p1, p99 = np.percentile(pic, (1, 99))
+        # pic = exposure.rescale_intensity(pic, in_range=(p1, p99))
 
+        # if do_erosion[f]:
+        #     pic = erosion(pic, disk(5))
+        #     pic = erosion(pic, disk(3))
+        #     pic = erosion(pic, disk(1))
 
-    #p1, p99 = np.percentile(pic, (1, 99))
-    #pic = exposure.rescale_intensity(pic, in_range=(p1, p99))
+        # thresh = threshold_otsu(pic)*1.0
+        thresh = 0.95 * pic.max()
 
-    # if do_erosion[f]:
-    #     pic = erosion(pic, disk(5))
-    #     pic = erosion(pic, disk(3))
-    #     pic = erosion(pic, disk(1))
+        mask = pic
+        h = thresh
+        seed = pic - h
+        dilated = reconstruction(seed, mask, method='dilation')
+        pic = pic - dilated
 
-    #thresh = threshold_otsu(pic)*1.0
-    thresh = 0.95 * pic.max()
+        if show_plots:
+            plt.imshow(pic)
+            plt.show()
 
+        thresh = threshold_otsu(pic)
+        bin = pic > thresh
+        # bin = pic > np.max(pic)/2
 
-    mask = pic
-    h = thresh
-    seed = pic - h
-    dilated = reconstruction(seed, mask, method='dilation')
-    pic = pic - dilated
+        if do_erosion[f]:
+            pic = erosion(pic, disk(5))
+            pic = erosion(pic, disk(3))
+            pic = erosion(pic, disk(1))
 
-    if show_plots:
-        plt.imshow(pic)
-        plt.show()
+        if show_plots:
+            plt.imshow(bin)
+            plt.show()
 
-    thresh = threshold_otsu(pic)
-    bin = pic > thresh
-    #bin = pic > np.max(pic)/2
-
-    if do_erosion[f]:
-        pic = erosion(pic, disk(5))
-        pic = erosion(pic, disk(3))
-        pic = erosion(pic, disk(1))
-
-    if show_plots:
+        fig = plt.figure()
         plt.imshow(bin)
-        plt.show()
-
-    plt.imshow(bin)
-    plt.savefig(savedir+file+'.png',dpi=600)
-    plt.close()
-
-    all_labels = measure.label(bin)
-    blobs_labels = measure.label(bin, background=0)
-
-
-    rs = np.zeros(0)
-    for region in regionprops(blobs_labels):
-        area = region.convex_area * nmppx**2
-        r = np.sqrt(region.convex_area/np.pi)*nmppx
-        rs = np.hstack((rs, r))
-
-        #rs = np.hstack((rs, region.equivalent_diameter/2*nmppx(mags[f])))
-
-        # bb = region.bbox
-        # r =  np.abs(float(bb[0]-bb[2])*nmppx(mags[f]))/2
-        # rs = np.hstack((rs, r))
-        # r =  np.abs(float(bb[1]-bb[3])*nmppx(mags[f]))/2
-        # rs = np.hstack((rs, r))
-
-
-    print(rs)
-    mask = (rs > 3) & (rs < 120)
-    rs = rs[mask]
-    #n_hist, b, patches = plt.hist(rs.ravel(), 50, histtype='stepfilled')
-    #plt.show()
-    n_hist, bin_edges = np.histogram(rs.ravel(), bins=50,density=True)
-    x = bin_edges[:-1]
-    y = n_hist
-    mask = (y > 0)
-    x = x[mask]
-    y = y[mask]
-
-    #plt.plot(x,y)
-    #plt.show()
-
-    fit_fun = lambda x, a,x0,sigma,c: gauss(x,a,x0,sigma)+c
-    #p0 = [y.max(),x[indexes[0]],10,0]
-    p0 = [y.max(), x[np.argmax(y)], 1, 0]
-
-    popt, pcov = scipy.optimize.curve_fit(fit_fun, x, y, p0)
-    print(popt)
-
-    radii.append(popt[1])
-    radii_fwhm.append(np.abs(popt[2])*2.3548) # convert sigma to fwhm
-
-    if show_plots:
-        plt.scatter(x,y)
-        x2 = np.linspace(x.min(),x.max(),200)
-        plt.plot(x2,fit_fun(x2,popt[0],popt[1],popt[2],popt[3]))
-        plt.show()
-
-    plt.plot(x,y)
-    x2 = np.linspace(x.min(),x.max(),200)
-    plt.plot(x2,fit_fun(x2,popt[0],popt[1],popt[2],popt[3]))
-    plt.savefig(savedir+file+'_radiushist.png',dpi=600)
-    plt.close()
-
-    print(file)
-    print('mean radius: '+str(popt[1]))
-
-
-
-
-    bin = pic > thresh
-    all_labels = measure.label(bin)
-    blobs_labels = measure.label(bin, background=0)
-
-    xy = np.array([0,2])
-    for region in regionprops(blobs_labels):
-        xy = np.vstack((xy, region.centroid))
-
-    print(xy.shape)
-
-    dists = np.zeros((xy.shape[0],xy.shape[0]))
-    for i in range(xy.shape[0]):
-        for j in range(xy.shape[0]):
-            #if i != j:
-                dists[i,j] = np.sqrt( (xy[i,0]-xy[j,0])**2 + (xy[i,1]-xy[j,1])**2 )*nmppx
-
-        # n_hist, b, patches = plt.hist(dists.ravel(), 1000, histtype='stepfilled')
-        # plt.show()
-        # plt.close()
-    n_hist, bin_edges = np.histogram(dists.ravel(), bins=int(dists.max() / 2), density=True)
-    x = bin_edges[:-1]
-    y = n_hist
-
-    # plt.xlim((60,1000))
-    mask = (x > 1) & (x < 150)
-    x = x[mask]
-    y = y[mask]
-
-    y = scipy.signal.medfilt(y, 5)
-
-    fit_fun = lambda x, a, x0, sigma, c: gauss(x, a, x0, sigma) + c
-    p0 = [y.max(), 150, 60, 0]
-    # bnds = ([0, 1, 1,0], [y.max()*100, 200, 500,y.max()])
-    # popt, pcov = curve_fit(fit_fun, x, y, p0,bounds=bnds)
-
-    err_fun = lambda p: np.mean((fit_fun(x, *p) - y) ** 2)
-    upper = [y.max() * 1000, 200, 500, y.max()]
-    lower = [0, 1, 1, 0]
-    bnds = []
-    for i in range(len(upper)):
-        bnds.append((lower[i], upper[i]))
-
-    # minimizer_kwargs = {"method": "SLSQP","bounds": bnds,"tol":1e-10}
-    # res = scipy.optimize.basinhopping(err_fun, p0, minimizer_kwargs=minimizer_kwargs, niter=1000,disp=False)
-    # res = opt.minimize(err_fun, p0, method='SLSQP', options={'disp': True, 'maxiter': 10000},tol=1e-10)
-    # res = opt.minimize(err_fun, start, method='L-BFGS-B', options={'disp': True, 'maxiter': 5000})
-    res = scipy.optimize.minimize(err_fun, p0, method='Nelder-Mead', options={'disp': True, 'maxiter': 5000})
-
-    popt = res.x
-
-    print(popt)
-
-    if show_plots:
-        plt.plot(x, y)
-        plt.plot(x, fit_fun(x, popt[0], popt[1], popt[2], popt[3]))
-        plt.title(file)
-        plt.show()
+        plt.savefig(savedir + file + '.png', dpi=600)
         plt.close()
 
-    plt.plot(x, y)
-    plt.plot(x, fit_fun(x, popt[0], popt[1], popt[2], popt[3]))
-    plt.savefig(savedir + file + '_ctchist.png', dpi=600)
-    plt.close()
+        all_labels = measure.label(bin)
+        blobs_labels = measure.label(bin, background=0)
 
-    ctc.append(popt[1])
-    ctc_fwhm.append(np.abs(popt[2]) * 2.3548)
+        fig = plt.figure()
+        plt.imshow(blobs_labels)
+        plt.savefig(savedir + file + '_labelled.png', dpi=600)
+        plt.close()
 
-print(ctc)
+        rs = np.zeros(0)
+        for region in regionprops(blobs_labels):
+            area = region.convex_area * nmppx ** 2
+            r = np.sqrt(region.convex_area / np.pi) * nmppx
+            rs = np.hstack((rs, r))
 
-f = open(path + "ctc.txt", 'w')
-f.write("file,ctc,fwhm"+"\r\n")
-for i in range(len(ctc)):
-    f.write(files[i] + ','+str(ctc[i])+ ','+str(ctc_fwhm[i]))
-    f.write("\r\n")
+            # rs = np.hstack((rs, region.equivalent_diameter/2*nmppx(mags[f])))
 
-f.close()
+            # bb = region.bbox
+            # r =  np.abs(float(bb[0]-bb[2])*nmppx(mags[f]))/2
+            # rs = np.hstack((rs, r))
+            # r =  np.abs(float(bb[1]-bb[3])*nmppx(mags[f]))/2
+            # rs = np.hstack((rs, r))
 
-print(radii)
+        # print(rs)
+        mask = (rs > 3) & (rs < 120)
+        rs = rs[mask]
+        # n_hist, b, patches = plt.hist(rs.ravel(), 50, histtype='stepfilled')
+        # plt.show()
+        n_hist, bin_edges = np.histogram(rs.ravel(), bins=50, density=True)
+        x = bin_edges[:-1]
+        y = n_hist
+        mask = (y > 0)
+        x = x[mask]
+        y = y[mask]
 
-f = open(path + "radii.txt", 'w')
-f.write("file,radius,fwhm"+"\r\n")
-for i in range(len(radii)):
-    f.write(files[i] + ','+str(radii[i]) + ','+str(radii_fwhm[i]))
-    f.write("\r\n")
+        # plt.plot(x,y)
+        # plt.show()
 
-f.close()
+        fit_fun = lambda x, a, x0, sigma, c: gauss(x, a, x0, sigma) + c
+        # p0 = [y.max(),x[indexes[0]],10,0]
+        p0 = [y.max(), x[np.argmax(y)], 1, 0]
 
+        popt, pcov = scipy.optimize.curve_fit(fit_fun, x, y, p0)
+        print(popt)
 
+        radii.append(popt[1])
+        radii_fwhm.append(np.abs(popt[2]) * 2.3548)  # convert sigma to fwhm
 
+        if show_plots:
+            plt.scatter(x, y)
+            x2 = np.linspace(x.min(), x.max(), 200)
+            plt.plot(x2, fit_fun(x2, popt[0], popt[1], popt[2], popt[3]))
+            plt.show()
 
+        fig = plt.figure()
+        plt.plot(x, y, label = 'measurements')
+        x2 = np.linspace(x.min(), x.max(), 200)
+        plt.plot(x2, fit_fun(x2, popt[0], popt[1], popt[2], popt[3]),label='Gauss fit')
+        plt.xlabel('radius [nm]')
+        plt.ylabel('density')
+        plt.title('histogram of radii')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(savedir + file + '_radiushist.png', dpi=600)
+        plt.close()
+
+        print(file)
+        print('mean radius: ' + str(popt[1]))
+
+        # bin = pic > thresh
+        # all_labels = measure.label(bin)
+        # blobs_labels = measure.label(bin, background=0)
+
+        xy = np.array([0, 2])
+        for region in regionprops(blobs_labels):
+            xy = np.vstack((xy, region.centroid))
+
+        print(xy.shape)
+
+        dists = np.zeros((xy.shape[0], xy.shape[0]))
+        for i in range(xy.shape[0]):
+            for j in range(xy.shape[0]):
+                # if i != j:
+                dists[i, j] = np.sqrt((xy[i, 0] - xy[j, 0]) ** 2 + (xy[i, 1] - xy[j, 1]) ** 2) * nmppx
+
+            # n_hist, b, patches = plt.hist(dists.ravel(), 1000, histtype='stepfilled')
+            # plt.show()
+            # plt.close()
+        n_hist, bin_edges = np.histogram(dists.ravel(), bins=int(dists.max() / 2), density=True)
+        x = bin_edges[:-1]
+        y = n_hist
+
+        # plt.xlim((60,1000))
+        mask = (x > 1) & (x < 200)
+        x = x[mask]
+        y = y[mask]
+
+        y = scipy.signal.medfilt(y, 5)
+
+        fit_fun = lambda x, a, x0, sigma, c: gauss(x, a, x0, sigma) + c
+        p0 = [y.max(), 150, 60, 0]
+        # bnds = ([0, 1, 1,0], [y.max()*100, 200, 500,y.max()])
+        # popt, pcov = curve_fit(fit_fun, x, y, p0,bounds=bnds)
+
+        err_fun = lambda p: np.mean((fit_fun(x, *p) - y) ** 2)
+        upper = [y.max() * 1000, 200, 500, y.max()]
+        lower = [0, 1, 1, 0]
+        bnds = []
+        for i in range(len(upper)):
+            bnds.append((lower[i], upper[i]))
+
+        # minimizer_kwargs = {"method": "SLSQP","bounds": bnds,"tol":1e-10}
+        # res = scipy.optimize.basinhopping(err_fun, p0, minimizer_kwargs=minimizer_kwargs, niter=1000,disp=False)
+        # res = opt.minimize(err_fun, p0, method='SLSQP', options={'disp': True, 'maxiter': 10000},tol=1e-10)
+        # res = opt.minimize(err_fun, start, method='L-BFGS-B', options={'disp': True, 'maxiter': 5000})
+        res = scipy.optimize.minimize(err_fun, p0, method='Nelder-Mead', options={'disp': True, 'maxiter': 5000})
+
+        popt = res.x
+
+        print(popt)
+
+        if show_plots:
+            plt.plot(x, y)
+            plt.plot(x, fit_fun(x, popt[0], popt[1], popt[2], popt[3]))
+            plt.title(file)
+            plt.show()
+            plt.close()
+
+        fig = plt.figure()
+        plt.plot(x, y,label='measurements')
+        plt.plot(x, fit_fun(x, popt[0], popt[1], popt[2], popt[3]),label='Gauss fit')
+        plt.xlabel('centre to centre distance [nm]')
+        plt.ylabel('density')
+        plt.title('histogram of centre to centre distances')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(savedir + file + '_ctchist.png', dpi=600)
+        plt.close()
+
+        ctc.append(popt[1])
+        ctc_fwhm.append(np.abs(popt[2]) * 2.3548)
+
+    print(ctc)
+
+    f = open(path + "ctc.txt", 'w')
+    f.write("file,ctc,fwhm" + "\r\n")
+    for i in range(len(ctc)):
+        f.write(files[i] + ',' + str(ctc[i]) + ',' + str(ctc_fwhm[i]))
+        f.write("\r\n")
+
+    f.close()
+
+    print(radii)
+
+    f = open(path + "radii.txt", 'w')
+    f.write("file,radius,fwhm" + "\r\n")
+    for i in range(len(radii)):
+        f.write(files[i] + ',' + str(radii[i]) + ',' + str(radii_fwhm[i]))
+        f.write("\r\n")
+
+    f.close()
 
 # for array in arrays:
 #

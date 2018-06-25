@@ -15,7 +15,7 @@ import os
 #path = '/home/sei/Spektren/pellicletest'
 #path = '/home/sei/data/Pascal'
 #path = '/home/sei/Spektren/zeisstest'
-path = '/home/sei/Spektren/lampe'
+path = '/home/sei/Spektren/Scan41A111ldb'
 
 
 

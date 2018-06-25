@@ -19,6 +19,7 @@ from skimage.morphology import remove_small_objects
 from skimage.morphology import watershed
 from skimage.restoration import denoise_bilateral
 from skimage.segmentation import relabel_sequential
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 
 # sample = "p41m"
@@ -41,7 +42,8 @@ nmpx = 4.2  # nm/px
 #nmpx = 5.17  # nm/px
 
 
-path = '/home/sei/Auswertung/'+sample+'/'
+#path = '/home/sei/Auswertung/'+sample+'/'
+path = '/home/sei/REM/p45m2/'
 
 
 # grid dimensions

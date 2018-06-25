@@ -21,7 +21,7 @@ from scipy.signal import savgol_filter
 #path = '/home/sei/Spektren/p41m_dif3/'
 
 #path = '/home/sei/Spektren/A1_oldlense/'
-path = '/home/sei/Spektren/A1_newlense_newsetup_100um/'
+path = '/home/sei/Spektren/Scan41A111ldb/'
 
 
 maxwl = 900
@@ -55,6 +55,8 @@ for file in os.listdir(path):
         m = re.match(r"([0-9]{1,2})", file)
         z.append(int(m.group(0)))
 
+
+files = ["normal.csv"]
 #files = ["0.csv","+1.csv","-1.csv","+300x.csv","-300x.csv","+300y.csv","-300y.csv"]
 
 #files = glob.glob(path+'/*.csv')

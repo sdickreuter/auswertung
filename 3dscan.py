@@ -1,7 +1,7 @@
 import numpy as np
 import re
 
-#from plotsettings import *
+from plotsettings import *
 
 #import matplotlib
 #matplotlib.use('QT4Agg')
@@ -25,14 +25,17 @@ import os
 from scipy.optimize import minimize, basinhopping
 from matplotlib import ticker
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+
 #path = '/home/sei/Spektren/p45m_did5_par_A1_scan3D_2/'
-path = '/home/sei/Spektren/p45m_did5_par_A1_scan3D_newlense/'
+#path = '/home/sei/Spektren/p45m_did5_par_A1_scan3D_newlense/'
 #path = '/home/sei/Spektren/cone3dnikon5/'
+path = '/home/sei/Spektren/cone3dnikon5/'
 
 
 filename = path+'cube.csv'
 
-maxwl = 1000
+maxwl = 900
 minwl = 450
 
 def gauss3d(x, y, z, amplitude, xo, yo, zo, fwhmx, fwhmy, fwhmz):
@@ -79,8 +82,8 @@ d = d.values
 d = d[:,3:-1]
 
 for i in range(d.shape[0]):
-    #d[i,:] = savgol_filter((d[i,:]-bg)/(lamp-dark),51,0)
-    d[i,:] = savgol_filter(d[i,:],51,0)
+    d[i,:] = savgol_filter((d[i,:]-bg)/(lamp-dark),51,0)
+    #d[i,:] = savgol_filter(d[i,:],51,0)
 
 d = d[:, mask]
 wl = wl[mask]
@@ -506,9 +509,10 @@ colors = [cmap(i) for i in int_norm]
 # colors = [cmap(i) for i in np.linspace(0, 1, len(wls))]
 
 #ax.scatter(zi,wls,c=colors,s=(int_norm*50)+1)
-ax.scatter(wls,zi,c=colors)
-ax.set_ylabel(r'$z\, /\, \mu m$')
-ax.set_xlabel(r'$\lambda\, /\, nm$')
+#ax.scatter(wls,zi,c=colors)
+ax.scatter(zi,wls,c=colors)
+ax.set_xlabel(r'$z\, /\, \mu m$')
+ax.set_ylabel(r'$\lambda\, /\, nm$')
 
 # divider = make_axes_locatable(ax)
 # m = plt.cm.ScalarMappable(cmap=cmap)

@@ -110,9 +110,11 @@ for sample in samples:
         for j in range(len(amps)):
             ax.plot(x, lorentz(x, amps[j], x0s[j], sigmas[j]))  # + c)
 
-        ax.plot(x, y, linestyle='', marker='.',label='measured spectrum')
+        #ax.plot(x, y, linestyle='', marker='.',label='measured spectrum')
+        ax.plot(x, y, linestyle='', marker='.', label='Messung')
         y_fit = lorentzSum(x, *popt)
-        ax.plot(x, y_fit, color='black',label='sum of Lorentzians')
+        #ax.plot(x, y_fit, color='black',label='sum of Lorentzians')
+        ax.plot(x, y_fit, color='black',label='Fit')
 
         indices = np.zeros(len(amps), dtype=np.int)
         for j in range(len(x0s)):
@@ -128,7 +130,7 @@ for sample in samples:
         #             expand_points=(1.7, 1.7),
         #             )  # force_points=0.1)
 
-        plt.ylabel(r'$I_{scat}\, /\, a.u.$')
+        plt.ylabel(r'$I_{df}\, /\, a.u.$')
         plt.xlabel(r'$\lambda\, /\, nm$')
         plt.legend()
 

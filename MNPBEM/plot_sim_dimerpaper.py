@@ -132,12 +132,12 @@ def asSpherical(xyz):
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
 #path = '/home/sei/MNPBEM/dimer_nonlocal/'
-path = '/home/sei/MNPBEM/dimer_90nmOx/'
+path = '/home/sei/MNPBEM/dimer_1nmOx/'
 diameter = 90#nm
 
-fit_peaks = False
+fit_peaks = True
 remove_exp = True
-plot_details = True
+plot_details = False
 plot_farfield = False
 
 #sims = ['dimer_r45nm_d2nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat']
@@ -189,7 +189,11 @@ try:
 except:
     pass
 
-
+fitteddir = path+'fitted/'
+try:
+    os.mkdir(fitteddir)
+except:
+    pass
 
 peakwl_scat = np.zeros(len(gaps),dtype=np.object)
 peakwl_charge = np.zeros(len(gaps),dtype=np.object)
@@ -451,6 +455,26 @@ for n,sim in enumerate(sims):
                                       popt[9]))
             plt.title('Three lorentz fit')
             plt.show()
+            plt.close()
+
+            fig, ax = newfig(0.9)
+
+            for j in range(3):
+                ax.plot(x, lorentz(x, popt[j+1], popt[j+3+1], popt[j+6+1]))  # + c)
+
+            # ax.plot(x, y, linestyle='', marker='.',label='measured spectrum')
+            ax.plot(x, y, linestyle='', marker='.', label='Simulation')
+            y_fit = three_lorentz(x, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5], popt[6], popt[7], popt[8],popt[9])
+            # ax.plot(x, y_fit, color='black',label='sum of Lorentzians')
+            ax.plot(x, y_fit, color='black', label='Fit')
+            plt.ylabel(r'$I_{df}\, /\, a.u.$')
+            plt.xlabel(r'$\lambda\, /\, nm$')
+            plt.legend()
+
+            plt.tight_layout()
+            plt.savefig(fitteddir + sim[:-4] + ".png", dpi=600)
+            plt.savefig(fitteddir + sim[:-4] + ".eps", dpi=1200)
+            plt.savefig(fitteddir + sim[:-4] + ".pgf", dpi=1200)
             plt.close()
 
             peakwl_scat[n] = popt[4:7]
