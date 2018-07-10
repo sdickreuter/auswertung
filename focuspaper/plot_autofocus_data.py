@@ -12,6 +12,7 @@ from plotsettings import *
 from gauss_detect import *
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
 import PIL
 from matplotlib import ticker
@@ -29,10 +30,10 @@ def gauss2D(pos, amplitude, xo, yo, fwhm, offset):
     return g.ravel()
 
 
-path = '/home/sei/Spektren/annika/'
+path = '/home/sei/Nextcloud/Annika/'
 
-samples = ['zmisc5']
-#samples = ['series_auto']
+#samples = ['zmiscnolense3']
+samples = ['zmiscfreeconemaker']
 
 
 maxwl = 900
@@ -106,7 +107,9 @@ for sample in samples:
         res = re.match(r"([0-9]{2,3})(.)([0-9]{2})", f)
         zpos2.append(res.group(0))
 
+    zpos2 = np.array(zpos2)
     sorted = np.argsort(zpos2)
+    zpos2 = zpos2[sorted]
     picfiles = np.array(picfiles)
     picfiles = picfiles[sorted]
 
@@ -134,7 +137,7 @@ for sample in samples:
     colors = cm(np.linspace(0.1, 1, len(files)))
 
     for i in range(img.shape[1]):
-        y = img[:,i]
+        y = img[:,i].copy()
         y -= y[:10].mean()
         y /= y.max()
         plt.plot(wl[mask], y, linewidth=0.6,color=colors[i],)
@@ -155,7 +158,7 @@ for sample in samples:
 
     for i in range(img.shape[1]):
         #plt.plot(wl, img[:,i]+i*0.001,linewidth=1,color=colors[i])
-        plt.plot(wl[mask], img[:, i] + i * 0.03, linewidth=1, color=colors[i],zorder=img.shape[1]-i)
+        plt.plot(wl[mask], img[:, i] + i * 0.0003, linewidth=1, color=colors[i],zorder=img.shape[1]-i)
 
     #plt.plot(wl, meanspec[mask], color = "black", linewidth=1)
     plt.xlim((minwl, maxwl))
@@ -166,7 +169,7 @@ for sample in samples:
     plt.savefig(savedir +'Overview' + ".png",dpi=300)
     plt.close()
 
-    plt.imshow(img.T,extent=[wl.min(),wl.max(),zpos.min(),zpos.max()],aspect=25,cmap='plasma')
+    plt.imshow(img.T,extent=[wl.min(),wl.max(),zpos.min(),zpos.max()],aspect=66,cmap='plasma')
     plt.xlabel(r'$\lambda [nm]$')
     plt.ylabel(r'$z [\mu m]$')
     #plt.legend(files)
@@ -174,7 +177,7 @@ for sample in samples:
     plt.savefig(savedir +'img' + ".png",dpi=300)
     plt.close()
 
-    plt.imshow(np.log(img.T),extent=[wl.min(),wl.max(),zpos.min(),zpos.max()],aspect=25,cmap='plasma')
+    plt.imshow(np.log(img.T),extent=[wl.min(),wl.max(),zpos.min(),zpos.max()],aspect=66,cmap='plasma')
     plt.xlabel(r'$\lambda [nm]$')
     plt.ylabel(r'$z [\mu m]$')
     #plt.legend(files)
@@ -214,16 +217,33 @@ for sample in samples:
     amp = np.array(amp)
     sigma = np.array(sigma)
 
-    plt.semilogy(zpos,1/sigma)
+    plt.plot(zpos2,1/sigma)
     plt.ylabel(r'${1}\over{\sigma} [um]$')
     plt.xlabel(r'$z [um]$')
     plt.tight_layout()
     plt.savefig(savedir + 'Sigma' + ".pdf", dpi=200)
     plt.close()
 
-    plt.plot(zpos,amp)
+    plt.plot(zpos2,amp)
     plt.ylabel(r'$Amplitude [a.u.]$')
     plt.xlabel(r'$z [um]$')
     plt.tight_layout()
     plt.savefig(savedir + 'Amp' + ".pdf", dpi=200)
     plt.close()
+
+    max = -np.inf
+    min = np.inf
+    for i in range(len(picfiles)):
+        file = picfiles[i]
+        img = np.loadtxt(savedir +file)
+        max = np.max([img.max(),max])
+        min = np.min([img.min(), min])
+
+    for i in range(len(picfiles)):
+        file = picfiles[i]
+        img = np.loadtxt(savedir +file)
+
+        plt.imshow(img.T, cmap='plasma',vmax=max,vmin=min)
+        plt.tight_layout()
+        plt.savefig(savedir+ 'plots/' + file[:-4] + ".png", dpi=300)
+        plt.close()
