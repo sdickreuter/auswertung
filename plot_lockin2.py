@@ -19,16 +19,17 @@ import matplotlib.pyplot as plt
 #path = '/home/sei/Spektren/p61_vpol_test/'
 #path = '/home/sei/Spektren/lockinvh3/'
 #path = '/home/sei/Spektren/lockinv4/'
-path = '/home/sei/data/lockin/'
+#path = '/home/sei/data/lockin/'
+path = '/home/sei/Nextcloud_Annika/'
 
 
 #samples = ['p45m_A1_h','p45m_A1_v','p45m_B1_h','p45m_B1_v','p45m_C1_h','p45m_C1_v',]
 #samples = ['p45m_A1_v','p45m_A1_v_2','p45m_B1_v','p45m_B1_v_2','p45m_C1_v','p45m_C1_v_2',]
-samples = ['p41m_dif5_E5_1um_y']
+samples = ['l2','l3','l4']
 
 
-maxwl = 1000
-minwl = 400
+maxwl = 900
+minwl = 500
 plot_normal = False
 
 @jit(nopython=True)
@@ -73,17 +74,18 @@ for sample in samples:
     width = lockin.shape[0]
 
     for ind in range(n):
-       lockin[:,ind] = (lockin[:,ind]-bg)/lamp-dark
+       #lockin[:,ind] = (lockin[:,ind]-bg)/lamp-dark
+       lockin[:, ind] = (lockin[:, ind]) / (lamp - dark)
 
     lockin = ndimage.median_filter(lockin, 2)
 
     f = 0.015
 
     x = np.arange(0, n)
-    ref = np.cos(2 * np.pi * x * f * 2)
-    ref2 = np.cos(2 * np.pi * x * f * 2+np.pi/2)
-    #ref = -sawtooth(2 * np.pi * x * f * 2, 0.5)
-    #ref2 = -sawtooth(2 * np.pi * x * f * 2 + np.pi / 2, 0.5)
+    #ref = np.cos(2 * np.pi * x * f * 2)
+    #ref2 = np.cos(2 * np.pi * x * f * 2+np.pi/2)
+    ref = -sawtooth(2 * np.pi * x * f * 2, 0.5)
+    ref2 = -sawtooth(2 * np.pi * x * f * 2 + np.pi / 2, 0.5)
     # ref = -sawtooth(2 * np.pi * x * f , 0.5)
     # ref2 = -sawtooth(2 * np.pi * x * f  + np.pi / 2, 0.5)
 
@@ -103,7 +105,7 @@ for sample in samples:
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    indices = [np.argmin(np.abs(wl-500)), np.argmin(np.abs(wl-600)), np.argmin(np.abs(wl-700)), np.argmin(np.abs(wl-810))]
+    indices = [np.argmin(np.abs(wl-600)), np.argmin(np.abs(wl-650)), np.argmin(np.abs(wl-700)), np.argmin(np.abs(wl-750))]
     for i, ind in enumerate(indices):
         buf = lockin[ind, :]
         buf = buf - np.min(buf)
@@ -122,7 +124,7 @@ for sample in samples:
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    indices = [np.argmin(np.abs(wl-500)), np.argmin(np.abs(wl-600)), np.argmin(np.abs(wl-700)), np.argmin(np.abs(wl-810))]
+    indices = [np.argmin(np.abs(wl-600)), np.argmin(np.abs(wl-650)), np.argmin(np.abs(wl-700)), np.argmin(np.abs(wl-750))]
     for i, ind in enumerate(indices):
         d = np.absolute(np.fft.rfft(lockin[ind, :]))
         p = np.abs(np.angle(np.fft.rfft(lockin[ind, :])))
@@ -163,7 +165,7 @@ for sample in samples:
     #res2 = savgol_filter(res_amp, 71, 1)
     #ax.plot(wl[mask], res2[mask] / res_amp[mask].max())#/lamp[mask])
 
-    plt.savefig(savedir+"lockin_nopsd.png")
+    plt.savefig(savedir+"lockin_psd.png")
     plt.close()
 
 
@@ -202,10 +204,18 @@ for sample in samples:
     plt.close()
 
 
+    fig = plt.figure()
+    f = 0.015
+    phases = np.linspace(np.pi/2,0,15)
+    for i in range(len(phases)):
+        phase = phases[i]
+        ref = sawtooth(2 * np.pi * x * f * 2+phase, 0.5)
+        res = lockin_filter(lockin,ref)
 
+        plt.plot(wl[mask],res[mask]/np.max(np.abs(res[mask]))+i/10)
 
-
-
+    plt.savefig(savedir + "lockin_phases.png")
+    plt.close()
 
         # ref = -sawtooth(2 * np.pi * x * f * 2, 0.5)
     # ref2 = -sawtooth(2 * np.pi * x * f * 2 + np.pi / 2, 0.5)

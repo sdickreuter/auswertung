@@ -15,7 +15,7 @@ from skimage.morphology import watershed
 from skimage.filters import threshold_otsu
 from skimage.restoration import denoise_tv_chambolle, denoise_bilateral
 from skimage import exposure
-from skimage.restoration import nl_means_denoising
+#from skimage.restoration import nl_means_denoising
 from skimage.morphology import disk
 from skimage.morphology import erosion
 from skimage.filters import rank

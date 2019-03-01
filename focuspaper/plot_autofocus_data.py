@@ -30,10 +30,10 @@ def gauss2D(pos, amplitude, xo, yo, fwhm, offset):
     return g.ravel()
 
 
-path = '/home/sei/Nextcloud/Annika/'
+path = '/home/sei/Nextcloud_Annika/'
 
 #samples = ['zmiscnolense3']
-samples = ['zmiscfreeconemaker']
+samples = ['zmisc']
 
 
 maxwl = 900
@@ -59,26 +59,26 @@ for sample in samples:
     except:
         pass
 
-    wl, lamp = np.loadtxt(open(savedir + "lamp.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
+    #wl, lamp = np.loadtxt(open(savedir + "lamp.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
     wl, dark = np.loadtxt(open(savedir + "dark.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
     #bg = dark
-    wl, bg = np.loadtxt(open(savedir + "background.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
+    #wl, bg = np.loadtxt(open(savedir + "background.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
 
     mask = (wl >= minwl) & (wl <= maxwl)
 
 
-    plt.plot(wl, lamp-dark)
-    plt.xlim((minwl, maxwl))
-    plt.savefig(savedir + "overview/lamp.pdf", dpi=300)
-    plt.close()
-    plt.plot(wl[mask], bg[mask])
-    plt.xlim((minwl, maxwl))
-    plt.savefig(savedir + "overview/bg.pdf", dpi=300)
-    plt.close()
-    plt.plot(wl[mask], dark[mask])
-    plt.xlim((minwl, maxwl))
-    plt.savefig(savedir + "overview/dark.pdf", dpi=300)
-    plt.close()
+    # plt.plot(wl, lamp-dark)
+    # plt.xlim((minwl, maxwl))
+    # plt.savefig(savedir + "overview/lamp.pdf", dpi=300)
+    # plt.close()
+    # plt.plot(wl[mask], bg[mask])
+    # plt.xlim((minwl, maxwl))
+    # plt.savefig(savedir + "overview/bg.pdf", dpi=300)
+    # plt.close()
+    # plt.plot(wl[mask], dark[mask])
+    # plt.xlim((minwl, maxwl))
+    # plt.savefig(savedir + "overview/dark.pdf", dpi=300)
+    # plt.close()
 
     files = []
     picfiles = []
@@ -117,14 +117,16 @@ for sample in samples:
     print(picfiles)
     n = len(files)
 
-    img = np.zeros((lamp[mask].shape[0],len(files)))
+    img = np.zeros((dark[mask].shape[0],len(files)))
 
     for i in range(len(files)):
         file = files[i]
         wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=1, unpack=True)
         #wl = wl[mask]
-        counts = (counts - bg) / (lamp - dark)
-                                        #27
+        #counts = (counts - bg) / (lamp - dark)
+        counts = (counts - dark)
+
+        #27
         filtered = savgol_filter(counts, 51, 0, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
 
         img[:,i] = filtered[mask]

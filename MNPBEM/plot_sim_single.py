@@ -105,7 +105,9 @@ def asSpherical(xyz):
 
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
-path = '/home/sei/MNPBEM/Annika/'
+#path = '/home/sei/MNPBEM/Annika/'
+path = '/home/sei/Nextcloud/chrissi/'
+#path = '/home/sei/MNPBEM/cone_chrissi2/'
 
 
 #sims = ['dimer_r45nm_d2nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat']
@@ -115,6 +117,8 @@ path = '/home/sei/MNPBEM/Annika/'
 #sims = ['dimer_r45nm_d1nm.mat','dimer_r45nm_d2nm.mat','dimer_r45nm_d3nm.mat','dimer_r45nm_d4nm.mat','dimer_r45nm_d5nm.mat','dimer_r45nm_d10nm.mat','dimer_r45nm_d15nm.mat','dimer_r45nm_d20nm.mat','dimer_r45nm_d25nm.mat','dimer_r45nm_d30nm.mat','dimer_r45nm_d35nm.mat','dimer_r45nm_d40nm.mat']
 #sims = ['dimer_r45nm_d2nm_theta0.mat']
 #sims = ['dimer_r45nm_d2nm_theta45.mat','dimer_r45nm_d5nm_theta45.mat','dimer_r45nm_d10nm_theta45.mat','dimer_r45nm_d15nm_theta45.mat','dimer_r45nm_d20nm_theta45.mat','dimer_r45nm_d30nm_theta45.mat','dimer_r45nm_d40nm_theta45.mat']
+#sims = ['cone_chrissi_r49.5nm_h162nm.mat']
+sims = ['c0a45162hmax8min4.stl.mat']
 
 
 listdir = os.listdir(path)
@@ -255,6 +259,7 @@ for n,sim in enumerate(sims):
 
     if plot_details:
         for ind in indexes_charge:
+        #for ind in indexes_sca:
             #ind = np.abs(wl - w).argmin()
 
             #val = np.real((sig2[ind]+sig1[ind])/2)
@@ -279,9 +284,9 @@ for n,sim in enumerate(sims):
 
             verts = verts1
             #ax.auto_scale_xyz([verts[:,0].max(),verts[:,0].min()],[verts[:,1].max(),verts[:,1].min()],[verts[:,2].max(),verts[:,2].min()])
-            #ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
-            #ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
-            #ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
+            ax.set_xlim3d(verts[:,0].min(), verts[:,0].max())
+            ax.set_ylim3d(verts[:,1].min(), verts[:,1].max())
+            ax.set_zlim3d(verts[:,2].min(), verts[:,2].max())
             #ax.auto_scale_xyz(np.vstack((verts1[:, 0],verts2[:, 0])), np.vstack((verts1[:, 1],verts2[:, 1])), np.vstack((verts1[:, 2],verts2[:, 2])))
             ax.axis('equal')
             #ax.auto_scale_xyz(np.vstack((verts1[:, 0],verts2[:, 0])), np.vstack((verts1[:, 1],verts2[:, 1])), np.vstack((verts1[:, 2],verts2[:, 2])))

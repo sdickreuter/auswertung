@@ -23,7 +23,8 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 #sample = "2C1"
 #arrays = ["2C1_75hept_B2"]
 
-arrays = ["p45m3"]
+sample = "8"
+arrays = ["C3","C4","D2","D3"]
 
 
 letters = [chr(c) for c in range(65, 91)]
@@ -31,18 +32,21 @@ letters = [chr(c) for c in range(65, 91)]
 for array in arrays:
 
     #path = '/home/sei/Auswertung/'+sample+'/'+array+'/'
-    path = '/home/sei/REM/' + array+'/'
+    #path = '/home/sei/REM/' + array+'/'
+    path = '/home/sei/REM/' + sample + '/'
 
-    try:
-        nmpx = np.loadtxt(path + "nmppx")
-    except:
-        raise RuntimeError("nmppx not found!")
+    # try:
+    #     nmpx = np.loadtxt(path + "nmppx")
+    # except:
+    #     raise RuntimeError("nmppx not found!")
+    nmpx = 2.63271  # nm/px
 
     print(nmpx)
 
 
     #savedir = 'plots/'
-    savedir = 'denoised/'
+    #savedir = 'denoised/'
+    savedir = array+'_plots/'
 
     fname = path + "sem_overview.jpg"
 
@@ -68,9 +72,9 @@ for array in arrays:
 
     size = figsize(1.0)
     #fig = plt.figure(figsize=(size[0], size[0]))
-    fig = plt.figure(figsize=(size[0],size[0]*0.8))
+    fig = plt.figure(figsize=(size[0],size[0]*1.0))
     #fig.suptitle(sample+' '+array)
-    gs1 = gridspec.GridSpec(nx, ny,wspace=0.01, hspace=0.0)
+    gs1 = gridspec.GridSpec(nx, ny,wspace=0.01, hspace=0.01)
     #indices = np.arange(0,len(files),1)
 
 
@@ -81,10 +85,10 @@ for array in arrays:
             id = (letters[iy] + "{0:d}".format(ix+1))
             try:
                 #print(path + savedir + id+'_denoised.png')
-                #img = np.asarray(PIL.Image.open(path + savedir + id+'.png'))
-                img = np.asarray(PIL.Image.open(path + savedir + id + '_denoised.jpg'))
+                img = np.asarray(PIL.Image.open(path + savedir + id+'.png'))
+                #img = np.asarray(PIL.Image.open(path + savedir + id + '_denoised.jpg'))
                 #img = img[40:(160 - 40), 40:(160 - 40)]
-                img = img[0:(484-0),60:(712-60)]
+                #img = img[0:(484-0),60:(712-60)]
                 skip = False
             except:
                 img = np.zeros((100,100))
@@ -97,8 +101,9 @@ for array in arrays:
             if not skip:
                 ax.imshow(img, cmap="gray_r")
                 #ax.text(2, +10, id, color="white", fontsize=8)
-                ax.text(10, +65, id, color="white", fontsize=8)
+                #ax.text(10, +65, id, color="white", fontsize=8)
                 #ax.text(0, -20, id, color="black", fontsize=8)
+                ax.text(2, +17, id, color="white", fontsize=8)
                 scalebar = AnchoredSizeBar(ax.transData,
                                            100/nmpx, '', 'lower right',
                                            pad=0.2,
@@ -141,7 +146,7 @@ for array in arrays:
 
     #gs1.update(wspace=0.01, hspace=0.0) # set the spacing between axes.
     #gs1.tight_layout(fig,pad=1.0,h_pad=-0.5, w_pad=0.2)
-    gs1.tight_layout(fig, pad=0.1, h_pad=0.2, w_pad=0.1)
+    gs1.tight_layout(fig, pad=0.1, h_pad=0.1, w_pad=0.1)
 
     #plt.show()
     # plt.savefig(path+"overview/" + sample+'_'+array+ "_sem_overview.pdf", dpi= 300)

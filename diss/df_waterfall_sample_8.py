@@ -24,40 +24,49 @@ from matplotlib.mlab import griddata
 #sample = '2C1_150hex_B3'
 #sample = '2C1_200hex_A2'
 
+
+
+
 path = '/home/sei/Spektren/8/'
-sample = '8_C3_horzpol'
+samples = ['8_C3_horzpol']
+sample_names = ['C3']
 
-
-savedir = path + sample + '/overview/'
-loaddir = path + sample + '/specs/'
-
-maxwl = 900
-minwl = 400
-
-substrate = '2C1'
-sem_dir = '/home/sei/Auswertung/'+substrate+'/'
-sem = pd.read_csv(sem_dir+sample+"/particles_SEM.csv", sep=',')
-sem["area"] *= 6.201172**2 # [nm²]
-sem_area = sem["area"]
-sem_ids = sem["id"]
+savedir = path
 
 files = []
 ids = []
-for file in os.listdir(loaddir):
-    if re.fullmatch(r"([A-Z]{1}[0-9]{1})(_corr.csv)$", file) is not None:
-        files.append(file)
-        ids.append(file[0:2])
-
-
 plot_ids = []
 plot_files = []
 plot_areas = []
-for r in range(len(ids)):
-    for s in range(len(sem_ids)):
-        if ids[r] == sem_ids[s]:
-            plot_ids.append(ids[r])
-            plot_files.append(files[r])
-            plot_areas.append(sem_area[s])
+
+for i in range(len(samples)):
+    sample = samples[i]
+    name = sample_names[i]
+
+
+    loaddir = path + sample + '/specs/'
+
+    maxwl = 900
+    minwl = 400
+
+    substrate = '2C1'
+    sem_dir = '/home/sei/REM/8/'
+    sem = pd.read_csv(sem_dir+sample[:4]+"_particles_SEM.csv", sep=',')
+    sem["area"] *= 6.201172**2 # [nm²]
+    sem_area = sem["area"]
+    sem_ids = sem["id"]
+
+    for file in os.listdir(loaddir):
+        if re.fullmatch(r"([A-Z]{1}[0-9]{1})(_corr.csv)$", file) is not None:
+            files.append(file)
+            ids.append(file[0:2])
+
+    for r in range(len(ids)):
+        for s in range(len(sem_ids)):
+            if ids[r] == sem_ids[s]:
+                plot_ids.append(name+'_'+ids[r])
+                plot_files.append(files[r])
+                plot_areas.append(sem_area[s])
 
 plot_ids = np.array(plot_ids)
 plot_files = np.array(plot_files)

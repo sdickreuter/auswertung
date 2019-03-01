@@ -129,7 +129,9 @@ def asSpherical(xyz):
 
 #path = '/home/sei/MNPBEM/10degillu/'
 #path = '/home/sei/MNPBEM/new_version/'
-path = '/home/sei/MNPBEM/cone_chrissi/'
+#path = '/home/sei/MNPBEM/cone_chrissi2/'
+path = '/home/sei/Nextcloud/chrissi/'
+
 
 fit_peaks = False
 remove_exp = False
@@ -446,8 +448,8 @@ for n,sim in enumerate(sims):
         # matplotlib.use('WXAgg', warn=False, force=True)
         # from matplotlib import pyplot as plt
 
-        #for ind in indexes_sca:
-        for ind in indexes_charge:
+        for ind in indexes_sca:
+        #for ind in indexes_charge:
 
             # val = np.real(sig2[ind])
             # fig = plt.figure()

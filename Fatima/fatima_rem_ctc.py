@@ -26,7 +26,7 @@ from skimage.morphology import watershed
 from skimage.restoration import denoise_bilateral
 from skimage.segmentation import relabel_sequential, random_walker, slic
 import re
-import exifread
+#import exifread
 from scipy.signal import savgol_filter
 import peakutils
 from scipy import fftpack
@@ -35,15 +35,21 @@ from scipy import fftpack
 # path = '/home/sei/Nextcloud/fatima/'
 # path = '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 35000x/'
 
-paths = ['/home/sei/REM/Nadim/Größenverteilung/8min Reihe 19.06/',
-         '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 35000x/',
-         '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 50000x/',
-         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 20ed 21.06/',
-         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 15000x/',
-         '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 35000x/',
-         ]
+# paths = ['/home/sei/REM/Nadim/Größenverteilung/8min Reihe 19.06/',
+#          '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 35000x/',
+#          '/home/sei/REM/Nadim/Größenverteilung/No UV 11.06 50000x/',
+#          '/home/sei/REM/Nadim/Größenverteilung/uv reihe 20ed 21.06/',
+#          '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 15000x/',
+#          '/home/sei/REM/Nadim/Größenverteilung/uv reihe 80ed 21.06 35000x/',
+#          ]
 
 #paths = ['/home/sei/REM/Nadim/Größenverteilung/8min Reihe 19.06/']
+
+paths = [#'/home/sei/Nextcloud/Nadim/Größenverteilung2/50000x/',
+         '/home/sei/Nextcloud/Nadim/Größenverteilung2/35000x/',
+         ]
+
+
 
 for path in paths:
 
@@ -128,7 +134,7 @@ for path in paths:
         #     pic = erosion(pic, disk(1))
 
         # thresh = threshold_otsu(pic)*1.0
-        thresh = 0.95 * pic.max()
+        thresh = 0.5 * pic.max()#0.95 * pic.max()
 
         mask = pic
         h = thresh

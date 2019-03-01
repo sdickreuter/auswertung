@@ -140,6 +140,7 @@ for sample in samples:
         plt.close()
 
         plt.figure()
+
         plt.plot(wl[minwl_ind:maxwl_ind],np.sum(img,0))
         plt.tight_layout()
         plt.savefig(savedir + 'plots/' + file[:-4] + "_sum.png", dpi=600)

@@ -9,14 +9,13 @@ from gridfit import fit_grid_spectra
 
 
 def make_plotmap(path, nx, ny, minwl,maxwl,switch_xy=False,flip_x=False,flip_y=False):
-
     files, ids, xy = fit_grid_spectra(path, nx, ny,switch_xy,flip_x,flip_y)
 
     savedir = path
-    wl, lamp = np.loadtxt(open(savedir + "lamp.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
-    wl, dark = np.loadtxt(open(savedir + "dark.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
+    wl, lamp = np.loadtxt(open(savedir + "lamp.csv", "rb"), delimiter=",", skiprows=8, unpack=True)
+    wl, dark = np.loadtxt(open(savedir + "dark.csv", "rb"), delimiter=",", skiprows=8, unpack=True)
     # bg = dark
-    wl, bg = np.loadtxt(open(savedir + "background.csv", "rb"), delimiter=",", skiprows=16, unpack=True)
+    wl, bg = np.loadtxt(open(savedir + "background.csv", "rb"), delimiter=",", skiprows=8, unpack=True)
 
     mask = (wl >= minwl) & (wl <= maxwl)
 
@@ -26,10 +25,9 @@ def make_plotmap(path, nx, ny, minwl,maxwl,switch_xy=False,flip_x=False,flip_y=F
     for i in range(n):
         file = files[i]
         # print(ids[i] + " " + file)
-        wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
+        wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=12, unpack=True)
         counts = (counts - bg) / (lamp - dark)
         max_counts[i] = counts[mask].max()
-
 
 
 
@@ -48,7 +46,7 @@ def make_plotmap(path, nx, ny, minwl,maxwl,switch_xy=False,flip_x=False,flip_y=F
         y = xy[i, 1]
         file = files[i]
         # print(ids[i] + " " + file)
-        wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=16, unpack=True)
+        wl, counts = np.loadtxt(open(savedir + file, "rb"), delimiter=",", skiprows=12, unpack=True)
         counts = (counts - bg) / (lamp - dark)
         filtered = savgol_filter(counts, 41, 1, deriv=0, delta=1.0, axis=-1, mode='interp', cval=0.0)
         nx = wl[mask]

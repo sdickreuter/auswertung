@@ -94,10 +94,10 @@ def fit_grid_spectra(path, nx, ny, switch_xy=False, flip_x=False, flip_y=False):
     for i in range(n):
         file = files[i]
         meta = open(savedir + file, "rb").readlines(300)
-        xy[i, 0] = float(meta[11].decode())
-        xy[i, 1] = float(meta[13].decode())
-        # xy[i, 0] = float(meta[7].decode())
-        # xy[i, 1] = float(meta[9].decode())
+        #xy[i, 0] = float(meta[11].decode())
+        #xy[i, 1] = float(meta[13].decode())
+        xy[i, 0] = float(meta[7].decode())
+        xy[i, 1] = float(meta[9].decode())
         inds[i] = i
         # wl, int[i] = np.loadtxt(open(savedir+file,"rb"),delimiter=",",skiprows=12,unpack=True)
 
@@ -123,7 +123,8 @@ def fit_grid_spectra(path, nx, ny, switch_xy=False, flip_x=False, flip_y=False):
     # files = files[ordered]
     # n = xy.shape[0]
 
-    inds, xy, ids = fit_grid(xy, nx, ny)
+    #inds, xy, ids = fit_grid(xy, nx, ny)
+    inds, xy, ids, a, b = fit_grid(xy, nx, ny)
     files = files[inds]
 
     # plt.figure(figsize=(5, 5))

@@ -16,7 +16,7 @@ matplotlib.use('QT4Agg')
 import matplotlib.pyplot as plt
 from matplotlib import cm
 matplotlib.pyplot.switch_backend('QT4Agg')
-from mayavi import mlab
+#from mayavi import mlab
 
 
 from mpl_toolkits.mplot3d import Axes3D
